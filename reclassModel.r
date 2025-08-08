@@ -131,7 +131,6 @@ pixelGroup,speciesCode,age,B,ecoregionGroup
 cohortData$speciesCode <- as.factor(cohortData$speciesCode)
 cohortData$ecoregionGroup <- as.factor(cohortData$ecoregionGroup)
 
-
 # Create the species table
 species <- data.table(
   speciesCode = factor(species_levels),
@@ -166,9 +165,9 @@ minRelativeB <- data.frame(
 )
 
 #--- Download the module if not done already
-# SpaDES.project::getModule(modulePath = getPaths()$modulePath,
-#                           c("PredictiveEcology/Biomass_core@master"),
-#                           overwrite = FALSE)
+SpaDES.project::getModule(modulePath = getPaths()$modulePath,
+                          c("PredictiveEcology/Biomass_core@master"),
+                          overwrite = FALSE)
 
 #--- simInit with studyArea
 modelTimeStep <- 10
@@ -188,6 +187,7 @@ sim <- simInit(
     Biomass_core = list(successionTimestep = modelTimeStep,
                         sppEquivCol = "LandR",
                         seedingAlgorithm = "noSeeding",
+                        .plots = NA,
                         # calcSummaryBGM = NULL,
                         .useCache = FALSE
     )
