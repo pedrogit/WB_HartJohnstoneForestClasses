@@ -88,7 +88,7 @@ doEvent.vegReclass = function(sim, eventTime, eventType) {
     },
 
     reclass = {
- browser()
+ # browser()
       ###########################################################
       # Extract values from LandR raster of vegetation groups (stands) 
       # for the study area. 433161 rows
@@ -184,7 +184,12 @@ doEvent.vegReclass = function(sim, eventTime, eventType) {
 
   save = {
 # browser()
-    rname <- file.path(outputPath(sim), paste0("vegType_", time(sim), ".tif"))
+    # Save the input sim$pixelGroupMap raster
+    rname <- file.path(outputPath(sim), paste0("pixGMap_", sprintf("%03d", time(sim)), ".tif"))
+    terra::writeRaster(sim$pixelGroupMap, rname, overwrite = TRUE)
+    
+    # Save the reclassified raster
+    rname <- file.path(outputPath(sim), paste0("vegType_", sprintf("%03d", time(sim)), ".tif"))
     terra::writeRaster(sim$vegTypesRas, rname, overwrite = TRUE)
     
     sim <- scheduleEvent(sim, time(sim) + P(sim)$.saveInterval, "vegReclass", "save", 2)

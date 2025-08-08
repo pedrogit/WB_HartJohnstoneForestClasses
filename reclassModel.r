@@ -181,8 +181,8 @@ modelTimeStep <- 10
 
 sim <- simInit(
   times = list(start = 0, end = 20),
-  # modules = list("Biomass_core", "vegReclass"),
-  modules = list("Biomass_core"),
+  modules = list("Biomass_core", "vegReclass"),
+  # modules = list("Biomass_core"),
   params = list(
     Biomass_core = list(successionTimestep = modelTimeStep,
                         sppEquivCol = "LandR",
@@ -191,9 +191,9 @@ sim <- simInit(
                         # calcSummaryBGM = NULL,
                         .useCache = FALSE
     )
-    #, vegReclass = list(reclassTimeStep = modelTimeStep,
-    #                       .saveInitialTime = 0,
-    #                       .saveInterval = modelTimeStep)
+    , vegReclass = list(reclassTimeStep = modelTimeStep,
+                          .saveInitialTime = 0,
+                          .saveInterval = modelTimeStep)
   ),
   objects = list(
     cohortData = cohortData,
