@@ -19,19 +19,10 @@ sumRelBs <- function(DT, match) {
 ##################################################################
 # Reclass cohort data in preparation to be reclassified as lichen 
 # by another module
-reclassSDForLichen <- function(DT){
-  # sort(LandR::sppEquivalencies_CA$LandR)
-  jackPineSp <- c("Pinu_ban")
-  larchSp <- c("Lari_dec", "Lari_kae", "Lari_lar", "Lari_lya", "Lari_occ", "Lari_sib", "Lari_sp", "Lari_spp")
-  spruceSp <- c("Pice_abi", "Pice_eng", "Pice_gla", "Pice_koy", "Pice_lut", 
-                "Pice_mar", "Pice_pun", "Pice_rub", "Pice_sit", "Pice_sp", "Pice_spp")
-  coniSp <- c(spruceSp, jackPineSp, larchSp)
-  # deciSp <- c("Popu_tre", "Popu_bal", "Betu_pap")
-  # browser()
-  
-  sprucePct <- sumRelBs(DT, "Pice")
+reclassSDForLichen <- function(DT, jackPineSp, larchSp, spruceSp){
+  sprucePct <- sumRelBs(DT, spruceSp)
   jackPinePct <- sumRelBs(DT, jackPineSp)
-  larchPct <- sumRelBs(DT, "Lari")
+  larchPct <- sumRelBs(DT, larchSp)
   coniPct <- sprucePct + jackPinePct + larchPct
   deciPct <- 1 - coniPct
   
@@ -39,7 +30,7 @@ reclassSDForLichen <- function(DT){
   type <- ifelse(jackPinePct >= dominancePer, "jackpine",
           ifelse(larchPct >= 0.75, "larch",
           ifelse(sprucePct >= dominancePer, "spruce",
-          ifelse(coniPct >= dominancePer, "conimixed",
+          ifelse(coniPct >= dominancePer, "conimix",
           ifelse(deciPct > dominancePer, "deci", "mixed")))))
   
   return(type)
@@ -55,7 +46,8 @@ vegSummary <- function(DT){
 
 ##################################################################
 # Reclass a whole cohort data table based on biomass
-reclassCohortForLichen <- function(cohortData, pixelGroupMap) {
+reclassCohortForLichen <- function(cohortData, pixelGroupMap, 
+                                   jackPineSp, larchSp, spruceSp) {
   # Add the sum of biomass and the relative biomass per pixelGroup & speciesCode
   cohortDataWithB <- cohortData[, sumB := sum(B), by = .(pixelGroup)]
   cohortDataWithB[, relB := sum(B)/sumB, by = .(pixelGroup, speciesCode)]
@@ -73,8 +65,8 @@ reclassCohortForLichen <- function(cohortData, pixelGroupMap) {
   # Sort and set the key to the pixelGroup column for faster processing
   data.table::setkeyv(unique_cohortDataWithB, cols = "pixelGroup")
   
-  unique_cohortDataWithB[, vegClass:= reclassSDForLichen(.SD), by = pixelGroup, .SDcols = c("speciesCode", "relB")]
-  unique_cohortDataWithB[, ':='(vegSum=vegSummary(.SD), vegClass= reclassSDForLichen(.SD)), by = pixelGroup, .SDcols = c("speciesCode", "relB")]
+  unique_cohortDataWithB[, vegClass:= reclassSDForLichen(.SD, jackPineSp, larchSp, spruceSp), by = pixelGroup, .SDcols = c("speciesCode", "relB")]
+  unique_cohortDataWithB[, ':='(vegSum=vegSummary(.SD), vegClass= reclassSDForLichen(.SD, jackPineSp, larchSp, spruceSp)), by = pixelGroup, .SDcols = c("speciesCode", "relB")]
   
   # browser()
   

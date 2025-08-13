@@ -31,35 +31,29 @@ defineModule(sim, list(
     defineParameter(".useCache", "logical", FALSE, NA, NA,
                     paste("Should caching of events or module be activated?",
                           "This is generally intended for data-type modules, where stochasticity",
-                          "and time are not relevant"))
+                          "and time are not relevant")),
+    defineParameter("jackPineSp", "character", c("Pinu_ban"), NA, NA,
+                    "List of jackpine species. Can also be the whole genus: \"Pinu\""),
+    defineParameter("larchSp", "character", c("Lari"), NA, NA,
+                    "List of larch species. Can also be the whole genus: \"Lari\""),
+    defineParameter("spruceSp", "character", c("Pice"), NA, NA,
+                    "List of larch species. Can also be the whole genus: \"Pice\"")
   ),
   inputObjects = bindrows(
     expectsInput("cohortData",  "data.table",
                  desc = paste("Initial community table, created from available biomass (g/m2)",
                               "age and species cover data, as well as ecozonation information",
                               "Columns: B, pixelGroup, speciesCode")),
-    # expectsInput("sppEquivCol", "data.table",
-    #              desc = "The column in sim$speciesEquivalency data.table to use as a naming convention" ),
-    # expectsInput("sppEquiv", "data.table",
-    #              desc = "The column in sim$speciesEquivalency data.table to use as a naming convention" ),
     expectsInput("studyArea", objectClass = "SpatialPolygonsDataFrame",
                   desc = "study area used for REPORTING. This shapefile is created in the WBI preamble module"),
     expectsInput("pixelGroupMap", "RasterLayer",
                  desc = "Initial community map that has mapcodes match initial community table"),
-    # expectsInput("rstLCC", "RasterLayer",
-    #              desc = "Initial Land Cover 2005 classes")
-
     ),
 
   outputObjects = bindrows(
     createsOutput("vegTypesRas", "RasterLayer",
                   desc = paste("reclassification of cohort data into pre-defined",
                                "vegetation classes for the WBI project")),
-    # createsOutput("nonForestRas", "RasterLayer",
-    #               desc = "reclassification of non forested pixels"),
-    # 
-    # createsOutput("ageRas", "RasterLayer",
-    #               desc = "reclassification of age from cohorData"),
   )
 ))
 
@@ -75,11 +69,15 @@ doEvent.vegReclass = function(sim, eventTime, eventType) {
     },
 
     reclass = {
+      browser()
       # Reclass
-      unique_cohortDataWithB <- reclassCohortForLichen(sim$cohortData, sim$pixelGroupMap)
+      unique_cohortDataWithB <- reclassCohortForLichen(cohortData = sim$cohortData, 
+                                                       pixelGroupMap = sim$pixelGroupMap, 
+                                                       jackPineSp = P(sim)$jackPineSp,
+                                                       larchSp = P(sim)$larchSp,
+                                                       spruceSp = P(sim)$spruceSp)
 
       # Save a row for each pixelGroup
-      #browser()
       fname <- file.path(outputPath(sim), paste0("reclassForLichen_", sprintf("%03d", time(sim)), ".csv"))
       grouped <- unique_cohortDataWithB[, lapply(.SD, first), by = pixelGroup, 
                                         .SDcols = c("sumB", "vegSum", "vegClass")]
@@ -103,12 +101,6 @@ doEvent.vegReclass = function(sim, eventTime, eventType) {
       fname <- file.path(outputPath(sim), paste0("vegType_", sprintf("%03d", time(sim)), ".tif"))
       terra::writeRaster(sim$vegTypesRas, fname, overwrite = TRUE)
 
-      # Validate all possible outputs
-      # rastStack <- c(sim$pixelGroupMap, sim$vegTypesRas)
-      # uniqueVals <- terra::unique(rastStack)
-      # fname <- file.path(outputPath(sim), paste0("uniquev_", sprintf("%03d", time(sim)), ".csv"))
-      # write.csv(uniqueVals, fname)
-      
       # Reschedule the event
       sim <- scheduleEvent(sim, time(sim) + P(sim)$.saveInterval, "vegReclass", "save", 2)
     },
