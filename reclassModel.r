@@ -30,7 +30,7 @@ terra::values(rtm) <- 2
 # mapview(rtm)
 
 # Create a pixelGroupMap of cohorts for Biomass_core
-pixelGroupMap <- SpaDES.tools::neutralLandscapeMap(rtm, type="nlm_mosaictess", germs=100)
+pixelGroupMap <- SpaDES.tools::neutralLandscapeMap(rtm, type="nlm_mosaictess", germs=500)
 #mapview(pixelGroupMap)
 
 # Reclass it to integer values
@@ -100,32 +100,32 @@ species_levels <- c("Pinu_ban", "Pice_mar", "Betu_pap", "Popu_tre", "Acer_rub")
 
 cohortData <- fread("
 pixelGroup,speciesCode,age,B,ecoregionGroup
-0,Acer_rub,75,1,1_09
-0,Pice_mar,5,3,1_09
-0,Popu_tre,45,3,1_09
-1,Pinu_ban,20,0,1_09
-1,Betu_pap,15,9,1_09
+0,Acer_rub, 75,1,1_09
+0,Pice_mar,  5,3,1_09
+0,Popu_tre, 45,3,1_09
+1,Pinu_ban, 20,1,1_09
+1,Betu_pap, 15,9,1_09
 1,Acer_rub,135,5,1_09
 2,Acer_rub,150,4,1_09
 2,Pice_mar,100,1,1_09
 3,Pinu_ban,135,5,1_09
-3,Acer_rub,70,7,1_09
-3,Popu_tre,70,6,1_09
+3,Acer_rub, 70,7,1_09
+3,Popu_tre, 70,6,1_09
 4,Pice_mar,100,1,1_09
 4,Pinu_ban,105,9,1_09
-4,Betu_pap,25,3,1_09
-5,Betu_pap,80,7,1_09
+4,Betu_pap, 25,3,1_09
+5,Betu_pap, 80,7,1_09
 5,Pinu_ban,130,2,1_09
-5,Acer_rub,60,5,1_09
-6,Pinu_ban,10,0,1_09
-6,Betu_pap,80,0,1_09
+5,Acer_rub, 60,5,1_09
+6,Pinu_ban, 10,1,1_09
+6,Betu_pap, 80,1,1_09
 7,Pinu_ban,145,9,1_09
-7,Pice_mar,95,9,1_09
-7,Betu_pap,50,4,1_09
+7,Pice_mar, 95,9,1_09
+7,Betu_pap, 50,4,1_09
 8,Betu_pap,130,8,1_09
 8,Pinu_ban,130,5,1_09
-9,Pinu_ban,40,7,1_09
-9,Betu_pap,20,3,1_09
+9,Pinu_ban, 40,7,1_09
+9,Betu_pap, 20,3,1_09
 ") 
 # Convert the speciesCode and the ecoregionGroup columns to factors
 cohortData$speciesCode <- as.factor(cohortData$speciesCode)
