@@ -18,20 +18,22 @@ sumRelBs <- function(DT, match) {
 
 ##################################################################
 # Reclass cohort data in preparation to be reclassified as lichen 
-# by another module
+# by another module.
 reclassSDForLichen <- function(DT, jackPineSp, larchSp, spruceSp){
   sprucePct <- sumRelBs(DT, spruceSp)
   jackPinePct <- sumRelBs(DT, jackPineSp)
   larchPct <- sumRelBs(DT, larchSp)
   coniPct <- sprucePct + jackPinePct + larchPct
+  
+  # For now decideous percentage is everything not a conifer
   deciPct <- 1 - coniPct
   
-  dominancePer <- 2/3;
-  type <- ifelse(jackPinePct >= dominancePer, "jackpine",
+  dominancePct <- 2/3;
+  type <- ifelse(jackPinePct >= dominancePct, "jackpine",
           ifelse(larchPct >= 0.75, "larch",
-          ifelse(sprucePct >= dominancePer, "spruce",
-          ifelse(coniPct >= dominancePer, "conimix",
-          ifelse(deciPct > dominancePer, "deci", "mixed")))))
+          ifelse(sprucePct >= dominancePct, "spruce",
+          ifelse(coniPct >= dominancePct, "conimix",
+          ifelse(deciPct > dominancePct, "deci", "mixed")))))
   
   return(type)
 }
