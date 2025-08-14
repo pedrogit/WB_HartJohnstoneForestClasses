@@ -17,9 +17,9 @@ sumRelBs <- function(DT, match) {
 # sumRelBs(df, c("Ac", "B"))
 
 ##################################################################
-# Reclass cohort data in preparation to be reclassified as lichen 
+# Class cohort data in preparation to be reclassified as lichen 
 # by another module.
-reclassSDForLichen <- function(DT, jackPineSp, larchSp, spruceSp, pb = NULL){
+classStand <- function(DT, jackPineSp, larchSp, spruceSp, pb = NULL){
 # browser()  
   sprucePct <- sumRelBs(DT, spruceSp)
   jackPinePct <- sumRelBs(DT, jackPineSp)
@@ -46,15 +46,15 @@ reclassSDForLichen <- function(DT, jackPineSp, larchSp, spruceSp, pb = NULL){
 
 ##################################################################
 # Build a string from many cohort rows to ease comparison with 
-# reclassification
-vegSummary <- function(DT){
+# classification
+classSummary <- function(DT){
   # browser()
   paste0(DT$speciesCode, "(", round(DT$relB, 2), ")", collapse = " ")
 }
 
 ##################################################################
-# Reclass a whole cohort data table based on relative biomass
-vegReclass <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruceSp) {
+# Class a whole cohort data table based on relative biomass
+classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruceSp) {
   levels = c(1, 2, 3, 4, 5, 6)
   labels = c("jackpine", "larch", "spruce", "conimix", "deci", "mixed")
   colors <- c("#ADFF2F", "#0DFF2F", "#228B22", "#225522", "#B22222", "#8B4513")
@@ -88,35 +88,32 @@ vegReclass <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruceSp)
     total = nbGroup, # rounded to the nearest 100 ticks to get a final 100% 
     clear = FALSE, width = 80
   )
-  unique_cohortDataWithB[, vegClass:= reclassSDForLichen(.SD, jackPineSp, larchSp, spruceSp, pb), by = pixelGroup, .SDcols = c("speciesCode", "relB", "pgid")]
-  #unique_cohortDataWithB[, ':='(vegSum=vegSummary(.SD), vegClass= reclassSDForLichen(.SD, jackPineSp, larchSp, spruceSp)), by = pixelGroup, .SDcols = c("speciesCode", "relB")]
+  unique_cohortDataWithB[, standClass:= classStand(.SD, jackPineSp, larchSp, spruceSp, pb), by = pixelGroup, .SDcols = c("speciesCode", "relB", "pgid")]
+  #unique_cohortDataWithB[, ':='(classSum=classSummary(.SD), standClass=classStand(.SD, jackPineSp, larchSp, spruceSp)), by = pixelGroup, .SDcols = c("speciesCode", "relB")]
   if (nbGroup %% 100 != 0) {
     pb$tick(nbGroup %% 100)
   }
 
 #browser()
   
-  # Convert vegClass to factors
-  #unique_cohortDataWithB$vegClass <- factor(unique_cohortDataWithB$vegClass, levels = levels, labels = labels)
-  
   # Save a row for each pixelGroup
-  if ("vegSum" %in% colnames(unique_cohortDataWithB)) {
-    fname <- file.path(outputPath(sim), paste0("reclassForLichen_", sprintf("%03d", time(sim)), ".csv"))
+  if ("classSum" %in% colnames(unique_cohortDataWithB)) {
+    fname <- file.path(outputPath(sim), paste0("classStand_", sprintf("%03d", time(sim)), ".csv"))
     grouped <- unique_cohortDataWithB[, lapply(.SD, first), by = pixelGroup, 
-                                      .SDcols = c("sumB", "vegSum", "vegClass")]
+                                      .SDcols = c("sumB", "classSum", "standClass")]
     write.csv(grouped, fname)
   }
   
   # Rasterize
   # Create a reduced list of types per pixelGroups to be rasterized
-  cohortDataRD <- unique_cohortDataWithB[, list(vegClass = unique(vegClass)), by = "pixelGroup"]
-  vegTypesRas <- SpaDES.tools::rasterizeReduced(reduced = cohortDataRD,
+  cohortDataRD <- unique_cohortDataWithB[, list(standClass = unique(standClass)), by = "pixelGroup"]
+  standClassRast <- SpaDES.tools::rasterizeReduced(reduced = cohortDataRD,
                                                 fullRaster = pixelGroupMap,
                                                 mapcode = "pixelGroup", 
-                                                newRasterCols ="vegClass")
-  levels(vegTypesRas) <- data.frame(ID = levels, class = labels)
-  coltab(vegTypesRas) <- cbind(ID = levels, col = colors)
-  return(vegTypesRas)
+                                                newRasterCols ="standClass")
+  levels(standClassRast) <- data.frame(ID = levels, class = labels)
+  coltab(standClassRast) <- cbind(ID = levels, col = colors)
+  return(standClassRast)
 }
 
 

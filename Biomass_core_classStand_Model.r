@@ -173,16 +173,18 @@ SpaDES.project::getModule(modulePath = getPaths()$modulePath,
 #--- simInit with studyArea
 modelTimeStep <- 10
 
-# To run the vegReclass by itself
+# To run the standClass.r by itself
 # mySim <- simInit(times = list(start = 0, end = 0),
-#                  modules = list("vegReclass"),
-#                  params = list(vegReclass = list(reclassTimeStep = 1,
-#                                                  .saveInitialTime = 0,
-#                                                  .saveInterval = 1))
+#                  modules = list("standClass"),
+#                  params = list(standClass = list(reclassTimeStep = 1,
+#                                                    .saveInitialTime = 0,
+#                                                    .saveInterval = 1))
+
+options(spades.DTthreads = 20)
 
 sim <- simInit(
   times = list(start = 0, end = 20),
-  modules = list("Biomass_core", "vegReclass"),
+  modules = list("Biomass_core", "standClass"),
   # modules = list("Biomass_core"),
   params = list(
     Biomass_core = list(successionTimestep = modelTimeStep,
@@ -192,9 +194,9 @@ sim <- simInit(
                         # calcSummaryBGM = NULL,
                         .useCache = FALSE
     )
-    , vegReclass = list(reclassTimeStep = modelTimeStep,
-                          .saveInitialTime = 0,
-                          .saveInterval = modelTimeStep)
+    , standClass = list(standClassTimeStep = modelTimeStep,
+                        .saveInitialTime = 0,
+                        .saveInterval = modelTimeStep)
   ),
   objects = list(
     cohortData = cohortData,

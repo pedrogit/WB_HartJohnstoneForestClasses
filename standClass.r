@@ -1,17 +1,17 @@
 defineModule(sim, list(
-  name = "vegReclass",
-  description = paste("the aim of this module is to make a reclassification of cohortData into predefined vegetation classes to be reclassified as lichen by another module"),
+  name = "standClass",
+  description = paste("The aim of this module is to classify cohortData into predefined vegetation classes to be reclassified as lichen by another module"),
   keywords = c("lichen", "habitat types"),
   authors =  c(
     person("Pierre", "Racine", email= "pierre.racine@sbf.ulaval.ca", role = "aut")
   ),
   childModules = character(0),
-  version = list(vegReclass = "0.0.0.9000"),
+  version = list(standClass = "0.0.0.1000"),
   timeframe = as.POSIXlt(c(NA, NA)),
   timeunit = "year",
   # citation = list("citation.bib"),
-  # documentation = deparse(list("README.txt", "vegReclass.Rmd")),
-  reqdPkgs = list("qs", "fasterize", "SpaDES.tools", "googledrive", "data.table", "raster", "reproducible", "LandR"),
+  # documentation = deparse(list("README.txt", "standClass.Rmd")),
+  reqdPkgs = list("qs", "fasterize", "SpaDES.tools", "googledrive", "data.table", "raster", "reproducible", "LandR", "progress"),
   parameters = rbind(
     defineParameter(".plots", "character", "screen", NA, NA,
                     "Used by Plots function, which can be optionally used here"),
@@ -19,7 +19,7 @@ defineModule(sim, list(
                     "Describes the simulation time at which the first plot event should occur."),
     defineParameter(".plotInterval", "numeric", NA, NA, NA,
                     "Describes the simulation time interval between plot events."),
-    defineParameter("reclassTimeStep", "numeric", 1, NA, NA,
+    defineParameter("standClassTimeStep", "numeric", 1, NA, NA,
                      "Describes the simulation time at which the reclassify event should occur."),
     defineParameter(".saveInitialTime", "numeric", NA, NA, NA,
                     "Describes the simulation time at which the first save event should occur."),
@@ -51,47 +51,47 @@ defineModule(sim, list(
     ),
 
   outputObjects = bindrows(
-    createsOutput("vegTypesRas", "RasterLayer",
-                  desc = paste("reclassification of cohort data into pre-defined",
-                               "vegetation classes for the WBI project")),
+    createsOutput("standclassRast", "RasterLayer",
+                  desc = paste("classification of cohort data into pre-defined",
+                               "vegetation classes")),
   )
 ))
 
 # Events
-doEvent.vegReclass = function(sim, eventTime, eventType) {
+doEvent.standClass = function(sim, eventTime, eventType) {
   switch(
     eventType,
     init = {
       # schedule future event(s)
-      sim <- scheduleEvent(sim, time(sim), "vegReclass", "reclass", 1)
-      sim <- scheduleEvent(sim, P(sim)$.plotInitialTime, "vegReclass", "plot", 2)
-      sim <- scheduleEvent(sim, P(sim)$.saveInitialTime, "vegReclass", "save", 2)
+      sim <- scheduleEvent(sim, time(sim), "standClass", "classifyStand", 1)
+      sim <- scheduleEvent(sim, P(sim)$.plotInitialTime, "standClass", "plot", 2)
+      sim <- scheduleEvent(sim, P(sim)$.saveInitialTime, "standClass", "save", 2)
     },
 
-    reclass = {
-      sim$vegTypesRas <- vegReclass(cohortData = sim$cohortData, 
-                                    pixelGroupMap = sim$pixelGroupMap,
-                                    jackPineSp = P(sim)$jackPineSp,
-                                    larchSp = P(sim)$larchSp,
-                                    spruceSp = P(sim)$spruceSp)
+    classifyStand = {
+      sim$standClassRast <- classifyStand(cohortData = sim$cohortData, 
+                                      pixelGroupMap = sim$pixelGroupMap,
+                                      jackPineSp = P(sim)$jackPineSp,
+                                      larchSp = P(sim)$larchSp,
+                                      spruceSp = P(sim)$spruceSp)
 
-      sim <- scheduleEvent(sim, time(sim) + P(sim)$reclassTimeStep, "vegReclass", "reclass", 1)
+      sim <- scheduleEvent(sim, time(sim) + P(sim)$standClassTimeStep, "standClass", "classifyStand", 1)
 
       return(invisible(sim))
     },
 
     plot = {
-      Plot(sim$vegTypesRas)
-      sim <- scheduleEvent(sim, time(sim) + P(sim)$.plotInterval, "vegReclass", "plot", 2)
+      Plot(sim$standClassRast)
+      sim <- scheduleEvent(sim, time(sim) + P(sim)$.plotInterval, "standClass", "plot", 2)
     },
 
     save = {
       # Save the reclassified raster
-      fname <- file.path(outputPath(sim), paste0("vegType_", sprintf("%03d", time(sim)), ".tif"))
-      terra::writeRaster(sim$vegTypesRas, fname, overwrite = TRUE)
+      fname <- file.path(outputPath(sim), paste0("standClass_", sprintf("%03d", time(sim)), ".tif"))
+      terra::writeRaster(sim$standClassRast, fname, overwrite = TRUE)
 
       # Reschedule the event
-      sim <- scheduleEvent(sim, time(sim) + P(sim)$.saveInterval, "vegReclass", "save", 2)
+      sim <- scheduleEvent(sim, time(sim) + P(sim)$.saveInterval, "standClass", "save", 2)
     },
     warning(paste("Undefined event type: \'", current(sim)[1, "eventType", with = FALSE],
               "\' in module \'", current(sim)[1, "moduleName", with = FALSE], "\'", sep = ""))
@@ -104,7 +104,7 @@ doEvent.vegReclass = function(sim, eventTime, eventType) {
   #cacheTags <- c(currentModule(sim), "function:.inputObjects") ## uncomment this if Cache is being used
   dPath <- asPath(getOption("reproducible.destinationPath", dataPath(sim)), 1)
   message(currentModule(sim), ": using dataPath '", dPath, "'.")
-  data <- qread(file.path(modulePath(sim), "vegReclass/data/simOutDataPrep_AB.qs"))
+  data <- qread(file.path(modulePath(sim), "standClass/data/simOutDataPrep_AB.qs"))
   if (!suppliedElsewhere("studyArea", sim)) {
     message("study area not supplied. Using AB province within WB studyARea")
 #browser()
@@ -126,7 +126,7 @@ doEvent.vegReclass = function(sim, eventTime, eventType) {
   if (!suppliedElsewhere("rstLCC", sim)) {
     message("rstLCC not supplied. Please provide one")
     #sim$rstLCC <- data$rstLCC
-    sim$rstLCC <- raster(file.path(modulePath(sim), "vegReclass/data/AB_250_RTMLarge.tif"))
+    sim$rstLCC <- raster(file.path(modulePath(sim), "standClass/data/AB_250_RTMLarge.tif"))
   }
   if (!suppliedElsewhere("sppEquivCol", sim)) {
     message("sppEquivCol not supplied. Please provide one")
