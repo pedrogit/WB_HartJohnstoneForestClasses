@@ -57,6 +57,7 @@ vegSummary <- function(DT){
 vegReclass <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruceSp) {
   levels = c(1, 2, 3, 4, 5, 6)
   labels = c("jackpine", "larch", "spruce", "conimix", "deci", "mixed")
+  colors <- c("#ADFF2F", "#0DFF2F", "#228B22", "#225522", "#B22222", "#8B4513")
   
   # remember the start time for the progress bar
   start_time <- Sys.time()
@@ -109,11 +110,12 @@ vegReclass <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruceSp)
   # Rasterize
   # Create a reduced list of types per pixelGroups to be rasterized
   cohortDataRD <- unique_cohortDataWithB[, list(vegClass = unique(vegClass)), by = "pixelGroup"]
-  vegTypesRas <- SpaDES.tools::rasterizeReduced(reduced = cohortDataRD,
+  vegTypesRas <- rast(SpaDES.tools::rasterizeReduced(reduced = cohortDataRD,
                                                 fullRaster = pixelGroupMap,
                                                 mapcode = "pixelGroup", 
-                                                newRasterCols ="vegClass")
+                                                newRasterCols ="vegClass"))
   levels(vegTypesRas) <- data.frame(ID = levels, class = labels)
+  coltab(vegTypesRas) <- colors
   return(vegTypesRas)
 }
 
