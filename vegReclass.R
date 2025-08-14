@@ -69,19 +69,20 @@ doEvent.vegReclass = function(sim, eventTime, eventType) {
     },
 
     reclass = {
-      browser()
+      # browser()
       # Reclass
       unique_cohortDataWithB <- reclassCohortForLichen(cohortData = sim$cohortData, 
-                                                       pixelGroupMap = sim$pixelGroupMap, 
                                                        jackPineSp = P(sim)$jackPineSp,
                                                        larchSp = P(sim)$larchSp,
                                                        spruceSp = P(sim)$spruceSp)
 
       # Save a row for each pixelGroup
-      fname <- file.path(outputPath(sim), paste0("reclassForLichen_", sprintf("%03d", time(sim)), ".csv"))
-      grouped <- unique_cohortDataWithB[, lapply(.SD, first), by = pixelGroup, 
-                                        .SDcols = c("sumB", "vegSum", "vegClass")]
-      write.csv(grouped, fname)
+      if ("vegSum" %in% colnames(unique_cohortDataWithB)) {
+        fname <- file.path(outputPath(sim), paste0("reclassForLichen_", sprintf("%03d", time(sim)), ".csv"))
+        grouped <- unique_cohortDataWithB[, lapply(.SD, first), by = pixelGroup, 
+                                          .SDcols = c("sumB", "vegSum", "vegClass")]
+        write.csv(grouped, fname)
+      }
       
       # Rasterize
       sim$vegTypesRas <- cohortDataToRaster(unique_cohortDataWithB, sim$pixelGroupMap)
