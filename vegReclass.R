@@ -86,7 +86,8 @@ doEvent.vegReclass = function(sim, eventTime, eventType) {
       
       # Rasterize
       sim$vegTypesRas <- cohortDataToRaster(unique_cohortDataWithB, sim$pixelGroupMap)
-
+      levels(sim$vegTypesRas) <- data.frame(value = 1:5,
+                              class = c("deci", "Grassland", "Urban"))
       sim <- scheduleEvent(sim, time(sim) + P(sim)$reclassTimeStep, "vegReclass", "reclass", 1)
 
       return(invisible(sim))
