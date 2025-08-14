@@ -89,7 +89,9 @@ vegReclass <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruceSp)
   )
   unique_cohortDataWithB[, vegClass:= reclassSDForLichen(.SD, jackPineSp, larchSp, spruceSp, pb), by = pixelGroup, .SDcols = c("speciesCode", "relB", "pgid")]
   #unique_cohortDataWithB[, ':='(vegSum=vegSummary(.SD), vegClass= reclassSDForLichen(.SD, jackPineSp, larchSp, spruceSp)), by = pixelGroup, .SDcols = c("speciesCode", "relB")]
-  pb$tick(nbGroup %% 100)
+  if (nbGroup %% 100 != 0) {
+    pb$tick(nbGroup %% 100)
+  }
 
 #browser()
   
