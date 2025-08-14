@@ -69,23 +69,34 @@ doEvent.vegReclass = function(sim, eventTime, eventType) {
     },
 
     reclass = {
-      # browser()
-      # Reclass
-      unique_cohortDataWithB <- reclassCohortForLichen(cohortData = sim$cohortData, 
-                                                       jackPineSp = P(sim)$jackPineSp,
-                                                       larchSp = P(sim)$larchSp,
-                                                       spruceSp = P(sim)$spruceSp)
-
-      # Save a row for each pixelGroup
-      if ("vegSum" %in% colnames(unique_cohortDataWithB)) {
-        fname <- file.path(outputPath(sim), paste0("reclassForLichen_", sprintf("%03d", time(sim)), ".csv"))
-        grouped <- unique_cohortDataWithB[, lapply(.SD, first), by = pixelGroup, 
-                                          .SDcols = c("sumB", "vegSum", "vegClass")]
-        write.csv(grouped, fname)
-      }
-      
-      # Rasterize
-      sim$vegTypesRas <- cohortDataToRaster(unique_cohortDataWithB, sim$pixelGroupMap)
+#browser()
+      sim$vegTypesRas <- vegReclass(cohortData = sim$cohortData, 
+                                    pixelGroupMap = sim$pixelGroupMap,
+                                    jackPineSp = P(sim)$jackPineSp,
+                                    larchSp = P(sim)$larchSp,
+                                    spruceSp = P(sim)$spruceSp)
+      # # Reclass
+      # levels = c(1,2,3,4,5,6)
+      # labels = c("jackpine", "larch", "spruce", "conimix", "deci", "mixed")
+      # 
+      # unique_cohortDataWithB <- reclassCohortForLichen(cohortData = sim$cohortData, 
+      #                                                  jackPineSp = P(sim)$jackPineSp,
+      #                                                  larchSp = P(sim)$larchSp,
+      #                                                  spruceSp = P(sim)$spruceSps)
+      # 
+      # # Save a row for each pixelGroup
+      # if ("vegSum" %in% colnames(unique_cohortDataWithB)) {
+      #   fname <- file.path(outputPath(sim), paste0("reclassForLichen_", sprintf("%03d", time(sim)), ".csv"))
+      #   grouped <- unique_cohortDataWithB[, lapply(.SD, first), by = pixelGroup, 
+      #                                     .SDcols = c("sumB", "vegSum", "vegClass")]
+      #   write.csv(grouped, fname)
+      # }
+      # 
+      # # Rasterize
+      # sim$vegTypesRas <- cohortDataToRaster(unique_cohortDataWithB, 
+      #                                       sim$pixelGroupMap,
+      #                                       levels = levels,
+      #                                       labels = labels)
 
       sim <- scheduleEvent(sim, time(sim) + P(sim)$reclassTimeStep, "vegReclass", "reclass", 1)
 

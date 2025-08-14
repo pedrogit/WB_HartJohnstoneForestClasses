@@ -30,11 +30,13 @@ reclassSDForLichen <- function(DT, jackPineSp, larchSp, spruceSp, pb = NULL){
   deciPct <- 1 - coniPct
   
   dominancePct <- 2/3;
-  type <- ifelse(jackPinePct >= dominancePct, "jackpine",
-          ifelse(larchPct >= 0.75, "larch",
-          ifelse(sprucePct >= dominancePct, "spruce",
-          ifelse(coniPct >= dominancePct, "conimix",
-          ifelse(deciPct > dominancePct, "deci", "mixed")))))
+  type <- ifelse(jackPinePct >= dominancePct, 1, # jackpine
+          ifelse(larchPct >= 0.75,            2, # larch
+          ifelse(sprucePct >= dominancePct,   3, # spruce
+          ifelse(coniPct >= dominancePct,     4, # conimix
+          ifelse(deciPct > dominancePct,      5, # deci 
+                                              6  # mixed 
+          )))))
   
   if (!is.null(pb) && first(DT$pgid) %% 100 == 0){
     pb$tick(100)
@@ -52,8 +54,13 @@ vegSummary <- function(DT){
 
 ##################################################################
 # Reclass a whole cohort data table based on relative biomass
-reclassCohortForLichen <- function(cohortData, jackPineSp, larchSp, spruceSp) {
+vegReclass <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruceSp) {
+  levels = c(1, 2, 3, 4, 5, 6)
+  labels = c("jackpine", "larch", "spruce", "conimix", "deci", "mixed")
+  
+  # remember the start time for the progress bar
   start_time <- Sys.time()
+  
   # Add the sum of biomass and the relative biomass per pixelGroup & speciesCode
   cohortDataWithB <- cohortData[, sumB := sum(B), by = .(pixelGroup)]
   cohortDataWithB[, relB := sum(B)/sumB, by = .(pixelGroup, speciesCode)]
@@ -70,7 +77,6 @@ reclassCohortForLichen <- function(cohortData, jackPineSp, larchSp, spruceSp) {
   
   # Sort and set the key to the pixelGroup column for faster processing
   data.table::setkeyv(unique_cohortDataWithB, cols = "pixelGroup")
-# browser()
   
   # DT[ , .SD, by = ...] method
   unique_cohortDataWithB[, pgid := .GRP, by = pixelGroup]
@@ -85,20 +91,28 @@ reclassCohortForLichen <- function(cohortData, jackPineSp, larchSp, spruceSp) {
   #unique_cohortDataWithB[, ':='(vegSum=vegSummary(.SD), vegClass= reclassSDForLichen(.SD, jackPineSp, larchSp, spruceSp)), by = pixelGroup, .SDcols = c("speciesCode", "relB")]
   pb$tick(nbGroup %% 100)
 
-  return(unique_cohortDataWithB)
-}
-
-##################################################################
-# Convert cohort data table to raster
-cohortDataToRaster <- function(cohortData, pixelGroupMap){
-  # Convert the types to factors (to be rasterized)
-  cohortData$vegClass <- as.factor(cohortData$vegClass)
+#browser()
   
-  # Create a reduced list of types per pixelGroups
-  cohortData <- cohortData[, list(vegClass = unique(vegClass)), by = "pixelGroup"]
-  vegTypesRas <- SpaDES.tools::rasterizeReduced(reduced = cohortData,
+  # Convert vegClass to factors
+  #unique_cohortDataWithB$vegClass <- factor(unique_cohortDataWithB$vegClass, levels = levels, labels = labels)
+  
+  # Save a row for each pixelGroup
+  if ("vegSum" %in% colnames(unique_cohortDataWithB)) {
+    fname <- file.path(outputPath(sim), paste0("reclassForLichen_", sprintf("%03d", time(sim)), ".csv"))
+    grouped <- unique_cohortDataWithB[, lapply(.SD, first), by = pixelGroup, 
+                                      .SDcols = c("sumB", "vegSum", "vegClass")]
+    write.csv(grouped, fname)
+  }
+  
+  # Rasterize
+  # Create a reduced list of types per pixelGroups to be rasterized
+  cohortDataRD <- unique_cohortDataWithB[, list(vegClass = unique(vegClass)), by = "pixelGroup"]
+  vegTypesRas <- SpaDES.tools::rasterizeReduced(reduced = cohortDataRD,
                                                 fullRaster = pixelGroupMap,
                                                 mapcode = "pixelGroup", 
                                                 newRasterCols ="vegClass")
-  return (vegTypesRas)
+  levels(vegTypesRas) <- data.frame(ID = levels, class = labels)
+  return(vegTypesRas)
 }
+
+
