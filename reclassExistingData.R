@@ -6,9 +6,9 @@ dataFolder <- "G:/Home/FromMaria/CanESM2_run1"
 
 cohortData <- as.data.table(readRDS(file.path(dataFolder, "cohortData_year2011.rds")))
 
-# cohortData = cohortData[pixelGroup<10000]
+cohortData = cohortData[pixelGroup<=10000]
 length(unique(cohortData$pixelGroup))
-pixelGroupMap <- readRDS(file.path(dataFolder, "pixelGroupMap_year2011.rds"))
+pixelGroupMap <- rast(readRDS(file.path(dataFolder, "pixelGroupMap_year2011.rds")))
 
 source("G:/Home/MyTests/reclassModel/modules/vegReclass/R/reclass.r")
 vegRast <- vegReclass(cohortData, pixelGroupMap, 

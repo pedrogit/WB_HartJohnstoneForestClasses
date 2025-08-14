@@ -110,10 +110,10 @@ vegReclass <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruceSp)
   # Rasterize
   # Create a reduced list of types per pixelGroups to be rasterized
   cohortDataRD <- unique_cohortDataWithB[, list(vegClass = unique(vegClass)), by = "pixelGroup"]
-  vegTypesRas <- rast(SpaDES.tools::rasterizeReduced(reduced = cohortDataRD,
+  vegTypesRas <- SpaDES.tools::rasterizeReduced(reduced = cohortDataRD,
                                                 fullRaster = pixelGroupMap,
                                                 mapcode = "pixelGroup", 
-                                                newRasterCols ="vegClass"))
+                                                newRasterCols ="vegClass")
   levels(vegTypesRas) <- data.frame(ID = levels, class = labels)
   coltab(vegTypesRas) <- colors
   return(vegTypesRas)
