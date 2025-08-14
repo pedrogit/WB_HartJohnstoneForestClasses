@@ -115,7 +115,7 @@ vegReclass <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruceSp)
                                                 mapcode = "pixelGroup", 
                                                 newRasterCols ="vegClass")
   levels(vegTypesRas) <- data.frame(ID = levels, class = labels)
-  coltab(vegTypesRas) <- colors
+  coltab(vegTypesRas) <- cbind(ID = levels, col = colors)
   return(vegTypesRas)
 }
 
