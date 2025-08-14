@@ -72,7 +72,6 @@ reclassCohortForLichen <- function(cohortData, jackPineSp, larchSp, spruceSp) {
   data.table::setkeyv(unique_cohortDataWithB, cols = "pixelGroup")
 # browser()
   
-if (TRUE){
   # DT[ , .SD, by = ...] method
   unique_cohortDataWithB[, pgid := .GRP, by = pixelGroup]
   nbGroup <- uniqueN(unique_cohortDataWithB$pgid)
@@ -85,53 +84,7 @@ if (TRUE){
   unique_cohortDataWithB[, vegClass:= reclassSDForLichen(.SD, jackPineSp, larchSp, spruceSp, pb), by = pixelGroup, .SDcols = c("speciesCode", "relB", "pgid")]
   #unique_cohortDataWithB[, ':='(vegSum=vegSummary(.SD), vegClass= reclassSDForLichen(.SD, jackPineSp, larchSp, spruceSp)), by = pixelGroup, .SDcols = c("speciesCode", "relB")]
   pb$tick(nbGroup %% 100)
-} else {
-  # group by group method
-  # make a list of all unique pixel groups
-  groups <- unique(unique_cohortDataWithB$pixelGroup)
-  # count them
-  n_groups <- length(groups)
-  start_time <- Sys.time()
-  # init a progress bar
-  # pb <- txtProgressBar(min = 0, max = n_groups, style = 3)
-  
-  # create a vector of results
-  res_list <- vector("list", n_groups)
-  
-  # n_cores <- detectCores() - 1
-  
-  # loop over the groups
-  for (i in seq_along(groups)) {
-    # get the current group
-    g <- groups[i]
-    # create a subset data table with it
-    subDT <- unique_cohortDataWithB[pixelGroup == g, .SD, .SDcols = c("speciesCode", "relB")]
-    
-    # class the group into the right vegClass
-    res_list[[i]] <- data.table(pixelGroup = g, vegClass = reclassSDForLichen(subDT, jackPineSp, larchSp, spruceSp))
-    
-    # Prepare data for the progress bar
-    if (i %% 100 == 0 || i == n_groups){
-      elapsed <- as.numeric(Sys.time() - start_time, units = "secs")
-      percent <- round(i / n_groups * 100, 1)
-      eta <- round(elapsed * (n_groups - i) / i, 0)
-      msg <- sprintf(
-        "Processed %d groups out of %d. %s%% done. Time elapsed: %ds. ETA: %ds.",
-        i, n_groups, percent, round(elapsed), eta
-      )
 
-      cat("\r", msg)
-      flush.console()
-      #setTxtProgressBar(pb, i)
-    }
-  }
-  
-  #close(pb)
-  unique_cohortDataWithB <- rbindlist(res_list)
-}
-  
-  # browser()
-  
   return(unique_cohortDataWithB)
 }
 
