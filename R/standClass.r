@@ -49,7 +49,8 @@ classStand <- function(DT, jackPineSp, larchSp, spruceSp, pb = NULL){
 
 myTick <- function(pb, len = 100){
     pb$tick(len = len, 
-            tokens = list(totint = as.integer(pb$.__enclos_env__$private$total))
+            tokens = list(totint = as.integer(pb$.__enclos_env__$private$total),
+                          curint = as.integer(pb$.__enclos_env__$private$current))
     )
 }
 
@@ -87,7 +88,7 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
 
   # create the progress bar
   pb <- progress_bar$new(
-    format = "Classified :current/:totint groups. :percent done. Elapsed: :elapsedfull. ETA: :eta",
+    format = "Classified :curint/:totint groups. :percent done. Elapsed: :elapsedfull. ETA: :eta",
     total = nbGroup, # rounded to the nearest 100 ticks to get a final 100% 
     clear = FALSE, width = 80
   )
