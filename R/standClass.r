@@ -42,9 +42,15 @@ classStand <- function(DT, jackPineSp, larchSp, spruceSp, pb = NULL){
           )))))
   
   if (!is.null(pb) && first(DT$pgid) %% 100 == 0){
-    pb$tick(100)
+    myTick(pb = pb)
   }
   return(type)
+}
+
+myTick <- function(pb, len = 100){
+    pb$tick(len = len, 
+            tokens = list(totint = as.integer(pb$.__enclos_env__$private$total))
+    )
 }
 
 ##################################################################
@@ -81,7 +87,7 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
 
   # create the progress bar
   pb <- progress_bar$new(
-    format = "Processed :current groups out of :total. :percent done. Time elapsed: :elapsedfull. ETA: :eta",
+    format = "Classified :current/:totint groups. :percent done. Elapsed: :elapsedfull. ETA: :eta",
     total = nbGroup, # rounded to the nearest 100 ticks to get a final 100% 
     clear = FALSE, width = 80
   )
@@ -89,7 +95,7 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
 
   # display the last itetation of the progress bar if it was not
   if (nbGroup %% 100 != 0) {
-    pb$tick(nbGroup %% 100)
+    myTick(pb = pb,len = nbGroup %% 100)
   }
 
   # Save a summary row for each pixelGroup (to visually validate the classification)
