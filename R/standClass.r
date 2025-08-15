@@ -1,12 +1,12 @@
 ##################################################################
-# Match species values at the genus or at the species level
+# Custom progress bar tick enforcing integer current and total values.
 ##################################################################
-speciesGenusMatch <- function(vals, matches){
-  # browser()
-  sapply(vals, function(v) any(startsWith(v, matches)))
+myTick <- function(pb, len = 100){
+  pb$tick(len = len, 
+          tokens = list(totint = as.integer(pb$.__enclos_env__$private$total),
+                        curint = as.integer(pb$.__enclos_env__$private$current + len))
+  )
 }
-# speciesGenusMatch(c("Ab", "Ac", "Bd"), c("A"))
-# speciesGenusMatch(c("Ab", "Ac", "Bd"), c("Ab", "B"))
 
 ##################################################################
 # Sum biomass for row matching a vector of species or genus
@@ -92,8 +92,10 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
   pb <- progress_bar$new(
     format = "Classified :curint/:totint groups. :percent done. Elapsed: :elapsedfull. ETA: :eta",
     total = nbGroup, # rounded to the nearest 100 ticks to get a final 100% 
-    clear = FALSE, width = 80
+    clear = FALSE, width = 80,
+    show_after = 0
   )
+  myTick(pb = pb, len = 0) # force it to display now
   
   # assign a class to every pixelGroup
   unique_cohortDataWithB[, standClass:= classStand(.SD, jackPineSp, larchSp, spruceSp, pb), by = pixelGroup, .SDcols = c("speciesCode", "relB", "pgid")]
