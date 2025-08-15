@@ -25,9 +25,6 @@ defineModule(sim, list(
                     "Describes the simulation time at which the first save event should occur."),
     defineParameter(".saveInterval", "numeric", NA, NA, NA,
                     "This describes the simulation time interval between save events."),
-    defineParameter("studyAreaName", "character", "AB", NA, NA,
-                    paste("study area name for each of the provinces in WB. Options are: BC, AB",
-                          "SK", "MB", "NT", "NU", "YU")),
     defineParameter(".useCache", "logical", FALSE, NA, NA,
                     paste("Should caching of events or module be activated?",
                           "This is generally intended for data-type modules, where stochasticity",
@@ -44,14 +41,12 @@ defineModule(sim, list(
                  desc = paste("Initial community table, created from available biomass (g/m2)",
                               "age and species cover data, as well as ecozonation information",
                               "Columns: B, pixelGroup, speciesCode")),
-    expectsInput("studyArea", objectClass = "SpatialPolygonsDataFrame",
-                  desc = "study area used for REPORTING. This shapefile is created in the WBI preamble module"),
     expectsInput("pixelGroupMap", "RasterLayer",
                  desc = "Initial community map that has mapcodes match initial community table"),
     ),
 
   outputObjects = bindrows(
-    createsOutput("standclassRast", "RasterLayer",
+    createsOutput("standClassRast", "RasterLayer",
                   desc = paste("classification of cohort data into pre-defined",
                                "vegetation classes")),
   )
@@ -105,42 +100,19 @@ doEvent.standClass = function(sim, eventTime, eventType) {
   dPath <- asPath(getOption("reproducible.destinationPath", dataPath(sim)), 1)
   message(currentModule(sim), ": using dataPath '", dPath, "'.")
   data <- qread(file.path(modulePath(sim), "standClass/data/simOutDataPrep_AB.qs"))
-  if (!suppliedElsewhere("studyArea", sim)) {
-    message("study area not supplied. Using AB province within WB studyARea")
-#browser()
-    # sim$studyArea <- Cache(prepInputs, 
-    #                        url = extractURL(objectName = "studyArea", sim = sim),
-    #                        destinationPath = getPaths()$inputPath,
-    #                       writeTo = "studyArea", overwrite = TRUE)
-    #data$studyArea$BCR <- "6"
-    sim$studyArea <- data$studyArea
-  }
   if (!suppliedElsewhere("cohortData", sim)) {
-    message("cohortData not supplied. Please provide one")
+    message("cohortData not supplied. Please provide one. Using dummy dataset...")
     sim$cohortData <- data$cohortData
   }
-  if (!suppliedElsewhere("sppEquiv", sim)) {
-    message("sppEquiv not supplied. Please provide one")
-    sim$sppEquiv <- data$sppEquiv
-  }
-  if (!suppliedElsewhere("rstLCC", sim)) {
-    message("rstLCC not supplied. Please provide one")
-    #sim$rstLCC <- data$rstLCC
-    sim$rstLCC <- raster(file.path(modulePath(sim), "standClass/data/AB_250_RTMLarge.tif"))
-  }
-  if (!suppliedElsewhere("sppEquivCol", sim)) {
-    message("sppEquivCol not supplied. Please provide one")
-    sim$sppEquivCol <- "LandR"
-  }
   if(!suppliedElsewhere("pixelGroupMap", sim)){
-    message("pixelGrouMap not supplied. Please provide one")
+    message("pixelGrouMap not supplied. Please provide one. Using dummy dataset...")
     # sim$pixelGroupMap <- Cache(LandR::prepInputsLCC,
     #                            year = 2005,
     #                            destinationPath = Paths$inputPath,
     #                            studyArea = sim$studyArea #,
     #                            #writeTo = "RTM.tif"
     #                            )
-    sim$pixelGroupMap <- data$pixelGroupMap
+    sim$pixelGroupMap <- rast(data$pixelGroupMap)
   }
 
   return(invisible(sim))

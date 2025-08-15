@@ -58,10 +58,7 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
   levels = c(1, 2, 3, 4, 5, 6)
   labels = c("jackpine", "larch", "spruce", "conimix", "deci", "mixed")
   colors <- c("#ADFF2F", "#0DFF2F", "#228B22", "#225522", "#B22222", "#8B4513")
-  
-  # remember the start time for the progress bar
-  start_time <- Sys.time()
-  
+
   # Add the sum of biomass and the relative biomass per pixelGroup & speciesCode
   cohortDataWithB <- cohortData[, sumB := sum(B), by = .(pixelGroup)]
   cohortDataWithB[, relB := sum(B)/sumB, by = .(pixelGroup, speciesCode)]
