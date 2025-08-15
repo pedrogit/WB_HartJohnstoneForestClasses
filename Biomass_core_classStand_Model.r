@@ -170,6 +170,7 @@ SpaDES.project::getModule(modulePath = getPaths()$modulePath,
                           c("PredictiveEcology/Biomass_core@master"),
                           overwrite = FALSE)
 modelTimeStep <- 10
+options(spades.DTthreads = 20)
 
 #--- simInit
 
@@ -179,7 +180,6 @@ modelTimeStep <- 10
 #                  params = list(standClass = list(standClassTimeStep = 1,
 #                                                  .saveInitialTime = 0,
 #                                                  .saveInterval = modelTimeStep)))
-options(spades.DTthreads = 20)
 
 # To run the standClass module in conjunction with Biomass_core
 sim <- simInit(
