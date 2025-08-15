@@ -51,6 +51,7 @@ classStand <- function(DT, jackPineSp, larchSp, spruceSp, pb = NULL){
 # Build a string from many cohort rows to ease comparison with 
 # classification
 ##################################################################
+speciesSummary <- function(DT){
   # browser()
   paste0(DT$speciesCode, "(", round(DT$relB, 2), ")", collapse = " ")
 }
@@ -92,21 +93,24 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
     total = nbGroup, # rounded to the nearest 100 ticks to get a final 100% 
     clear = FALSE, width = 80
   )
-  unique_cohortDataWithB[, standClass:= classStand(.SD, jackPineSp, larchSp, spruceSp, pb), by = pixelGroup, .SDcols = c("speciesCode", "relB", "pgid")]
-  #unique_cohortDataWithB[, ':='(classSum=classSummary(.SD), standClass=classStand(.SD, jackPineSp, larchSp, spruceSp)), by = pixelGroup, .SDcols = c("speciesCode", "relB")]
+  #unique_cohortDataWithB[, standClass:= classStand(.SD, jackPineSp, larchSp, spruceSp, pb), by = pixelGroup, .SDcols = c("speciesCode", "relB", "pgid")]
+  unique_cohortDataWithB[, ':='(speciesSummary=speciesSummary(.SD), standClass=classStand(.SD, jackPineSp, larchSp, spruceSp, pb)), by = pixelGroup, .SDcols = c("speciesCode", "relB", "pgid")]
 
   # display the last itetation of the progress bar if it was not
   if (nbGroup %% 100 != 0) {
     pb$tick(nbGroup %% 100)
   }
 
-#browser()
-  
-  # Save a row for each pixelGroup
-  if ("classSum" %in% colnames(unique_cohortDataWithB)) {
-    fname <- file.path(outputPath(sim), paste0("classStand_", sprintf("%03d", time(sim)), ".csv"))
-    grouped <- unique_cohortDataWithB[, lapply(.SD, first), by = pixelGroup, 
-                                      .SDcols = c("sumB", "classSum", "standClass")]
+  # Save a summary row for each pixelGroup (to visually validate the classification)
+  if ("speciesSummary" %in% colnames(unique_cohortDataWithB)) {
+    fname <- file.path(outputPath(sim), paste0("standClass", sprintf("%03d", time(sim)), ".csv"))
+    # grouped <- unique_cohortDataWithB[, lapply(.SD, first), by = pixelGroup, 
+    #                                   .SDcols = c("sumB", "speciesSummary", "standClass")]
+    grouped <- unique_cohortDataWithB[, .(sumB = first(sumB), 
+                                          speciesSummary = first(speciesSummary),
+                                          standClassInt = first(standClass),
+                                          standClasschar = factor(first(standClass), levels = levels, labels = labels)), 
+                                      by = pixelGroup]
     write.csv(grouped, fname)
   }
   
