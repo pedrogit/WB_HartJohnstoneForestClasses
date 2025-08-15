@@ -68,7 +68,8 @@ doEvent.standClass = function(sim, eventTime, eventType) {
                                       pixelGroupMap = sim$pixelGroupMap,
                                       jackPineSp = P(sim)$jackPineSp,
                                       larchSp = P(sim)$larchSp,
-                                      spruceSp = P(sim)$spruceSp)
+                                      spruceSp = P(sim)$spruceSp,
+                                      time(sim))
 
       sim <- scheduleEvent(sim, time(sim) + P(sim)$standClassTimeStep, "standClass", "classifyStand", 1)
 

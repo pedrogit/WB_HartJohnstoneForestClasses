@@ -48,19 +48,11 @@ classStand <- function(DT, jackPineSp, larchSp, spruceSp, pb = NULL){
 }
 
 ##################################################################
-# Build a string from many cohort rows to ease comparison with 
-# classification
-##################################################################
-speciesSummary <- function(DT){
-  # browser()
-  paste0(DT$speciesCode, "(", round(DT$relB, 2), ")", collapse = " ")
-}
-
-##################################################################
 # Class a whole cohort data table based on relative biomass
 # For now classifyStand does not modify cohortData. It only produces a raster.
 ##################################################################
-classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruceSp) {
+classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruceSp, time = 0) {
+  outputClassificationSummaryTable <- TRUE
   levels = c(1, 2, 3, 4, 5, 6)
   labels = c("jackpine", "larch", "spruce", "conimix", "deci", "mixed")
   colors <- c("#ADFF2F", "#0DFF2F", "#228B22", "#225522", "#B22222", "#8B4513")
@@ -93,8 +85,7 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
     total = nbGroup, # rounded to the nearest 100 ticks to get a final 100% 
     clear = FALSE, width = 80
   )
-  #unique_cohortDataWithB[, standClass:= classStand(.SD, jackPineSp, larchSp, spruceSp, pb), by = pixelGroup, .SDcols = c("speciesCode", "relB", "pgid")]
-  unique_cohortDataWithB[, ':='(speciesSummary=speciesSummary(.SD), standClass=classStand(.SD, jackPineSp, larchSp, spruceSp, pb)), by = pixelGroup, .SDcols = c("speciesCode", "relB", "pgid")]
+  unique_cohortDataWithB[, standClass:= classStand(.SD, jackPineSp, larchSp, spruceSp, pb), by = pixelGroup, .SDcols = c("speciesCode", "relB", "pgid")]
 
   # display the last itetation of the progress bar if it was not
   if (nbGroup %% 100 != 0) {
@@ -102,12 +93,12 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
   }
 
   # Save a summary row for each pixelGroup (to visually validate the classification)
-  if ("speciesSummary" %in% colnames(unique_cohortDataWithB)) {
-    fname <- file.path(outputPath(sim), paste0("standClass", sprintf("%03d", time(sim)), ".csv"))
-    # grouped <- unique_cohortDataWithB[, lapply(.SD, first), by = pixelGroup, 
-    #                                   .SDcols = c("sumB", "speciesSummary", "standClass")]
+  if (outputClassificationSummaryTable) {
+# browser()
+    
+    fname <- file.path(getPaths()$outputPath, paste0("standClass_", sprintf("%03d", time), ".csv"))
     grouped <- unique_cohortDataWithB[, .(sumB = first(sumB), 
-                                          speciesSummary = first(speciesSummary),
+                                          speciesSummary = paste0(speciesCode, "(", round(relB, 2), ")", collapse = " "),
                                           standClassInt = first(standClass),
                                           standClasschar = factor(first(standClass), levels = levels, labels = labels)), 
                                       by = pixelGroup]
