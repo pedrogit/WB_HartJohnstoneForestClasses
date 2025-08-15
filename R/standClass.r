@@ -59,7 +59,7 @@ myTick <- function(pb, len = 100){
 # For now classifyStand does not modify cohortData. It only produces a raster.
 ##################################################################
 classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruceSp, time = 0) {
-  outputClassificationSummaryTable <- TRUE
+  saveClassSummaryTable <- TRUE
   levels = c(1, 2, 3, 4, 5, 6)
   labels = c("jackpine", "larch", "spruce", "conimix", "deci", "mixed")
   colors <- c("#ADFF2F", "#0DFF2F", "#228B22", "#225522", "#B22222", "#8B4513")
@@ -100,10 +100,9 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
   }
 
   # Save a summary row for each pixelGroup (to visually validate the classification)
-  if (outputClassificationSummaryTable) {
-# browser()
-    
+  if (saveClassSummaryTable && exists("getPaths", mode = "function")) {
     fname <- file.path(getPaths()$outputPath, paste0("standClass_", sprintf("%03d", time), ".csv"))
+    message("Save classification summary table to \"", fname, "\"...")
     grouped <- unique_cohortDataWithB[, .(sumB = first(sumB), 
                                           speciesSummary = paste0(speciesCode, "(", round(relB, 2), ")", collapse = " "),
                                           standClassInt = first(standClass),
