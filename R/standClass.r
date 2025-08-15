@@ -1,5 +1,6 @@
 ##################################################################
 # Match species values at the genus or at the species level
+##################################################################
 speciesGenusMatch <- function(vals, matches){
   # browser()
   sapply(vals, function(v) any(startsWith(v, matches)))
@@ -9,6 +10,7 @@ speciesGenusMatch <- function(vals, matches){
 
 ##################################################################
 # Sum biomass for row matching a vector of species or genus
+##################################################################
 sumRelBs <- function(DT, match) {
   DT[speciesGenusMatch(as.character(DT$speciesCode), match), relB] %>% sum()
 }
@@ -19,8 +21,9 @@ sumRelBs <- function(DT, match) {
 ##################################################################
 # Class cohort data in preparation to be reclassified as lichen 
 # by another module.
+##################################################################
 classStand <- function(DT, jackPineSp, larchSp, spruceSp, pb = NULL){
-# browser()  
+  # set species percentages
   sprucePct <- sumRelBs(DT, spruceSp)
   jackPinePct <- sumRelBs(DT, jackPineSp)
   larchPct <- sumRelBs(DT, larchSp)
@@ -47,13 +50,15 @@ classStand <- function(DT, jackPineSp, larchSp, spruceSp, pb = NULL){
 ##################################################################
 # Build a string from many cohort rows to ease comparison with 
 # classification
-classSummary <- function(DT){
+##################################################################
   # browser()
   paste0(DT$speciesCode, "(", round(DT$relB, 2), ")", collapse = " ")
 }
 
 ##################################################################
 # Class a whole cohort data table based on relative biomass
+# For now classifyStand does not modify cohortData. It only produces a raster.
+##################################################################
 classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruceSp) {
   levels = c(1, 2, 3, 4, 5, 6)
   labels = c("jackpine", "larch", "spruce", "conimix", "deci", "mixed")
@@ -80,7 +85,8 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
   # DT[ , .SD, by = ...] method
   unique_cohortDataWithB[, pgid := .GRP, by = pixelGroup]
   nbGroup <- uniqueN(unique_cohortDataWithB$pgid)
-# browser()
+
+  # create the progress bar
   pb <- progress_bar$new(
     format = "Processed :current groups out of :total. :percent done. Time elapsed: :elapsedfull. ETA: :eta",
     total = nbGroup, # rounded to the nearest 100 ticks to get a final 100% 
@@ -88,6 +94,8 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
   )
   unique_cohortDataWithB[, standClass:= classStand(.SD, jackPineSp, larchSp, spruceSp, pb), by = pixelGroup, .SDcols = c("speciesCode", "relB", "pgid")]
   #unique_cohortDataWithB[, ':='(classSum=classSummary(.SD), standClass=classStand(.SD, jackPineSp, larchSp, spruceSp)), by = pixelGroup, .SDcols = c("speciesCode", "relB")]
+
+  # display the last itetation of the progress bar if it was not
   if (nbGroup %% 100 != 0) {
     pb$tick(nbGroup %% 100)
   }
