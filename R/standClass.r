@@ -117,8 +117,16 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
                                                 fullRaster = pixelGroupMap,
                                                 mapcode = "pixelGroup", 
                                                 newRasterCols ="standClass")
-  levels(standClassRast) <- data.frame(ID = levels, class = labels)
-  coltab(standClassRast) <- cbind(ID = levels, col = colors)
+  
+  # rasterizeReduced might produce a RasterLayer object if pixelGroupMap is a RasterLayer
+  if ("SpatRaster" %in% class(standClassRast)) {
+    levels(standClassRast) <- data.frame(ID = levels, class = labels)
+    coltab(standClassRast) <- cbind(ID = levels, col = colors)
+  }
+  else {
+    message("Could not write levels and color palette to standClassRast because it is derived from pixelGroupMap which is not a SpatRaster raster...")
+  }
+    
   return(standClassRast)
 }
 
