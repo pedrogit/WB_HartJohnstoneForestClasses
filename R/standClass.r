@@ -60,7 +60,8 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
   colors <- c("#ADFF2F", "#0DFF2F", "#228B22", "#225522", "#B22222", "#8B4513")
 
   # Add the sum of biomass and the relative biomass per pixelGroup & speciesCode
-  cohortDataWithB <- cohortData[, sumB := sum(B), by = .(pixelGroup)]
+  cohortDataWithB <- cohortData
+  cohortDataWithB <- cohortDataWithB[, sumB := sum(B), by = .(pixelGroup)]
   cohortDataWithB[, relB := sum(B)/sumB, by = .(pixelGroup, speciesCode)]
   # set the NAs to 0
   cohortDataWithB[is.na(relB) & sumB == 0, relB := 0]
