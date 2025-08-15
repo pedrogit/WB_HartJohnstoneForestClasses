@@ -85,6 +85,8 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
   # DT[ , .SD, by = ...] method
   unique_cohortDataWithB[, pgid := .GRP, by = pixelGroup]
   nbGroup <- uniqueN(unique_cohortDataWithB$pgid)
+  
+  message(nbGroup, " groups to process...")
 
   # create the progress bar
   pb <- progress_bar$new(
@@ -92,6 +94,8 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
     total = nbGroup, # rounded to the nearest 100 ticks to get a final 100% 
     clear = FALSE, width = 80
   )
+  
+  # assign a class to every pixelGroup
   unique_cohortDataWithB[, standClass:= classStand(.SD, jackPineSp, larchSp, spruceSp, pb), by = pixelGroup, .SDcols = c("speciesCode", "relB", "pgid")]
 
   # display the last itetation of the progress bar if it was not
