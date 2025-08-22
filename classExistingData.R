@@ -28,7 +28,7 @@ classRast <- classifyStand(cohortData, pixelGroupMap,
 summary(classRast)
 hist(classRast)
 fname <- file.path("G:/Home/FromMariaOutput", "standclass_year2011.tif")
-terra::writeRaster(classRast, fname, overwrite = TRUE)
+terra::writeRaster(classRast, fname, datatype = "INT1U", overwrite = TRUE)
 
 fname <- file.path("G:/Home/FromMariaOutput", "pixelGroupMap_year2011.tif")
 terra::writeRaster(pixelGroupMap, fname, overwrite = TRUE)
@@ -62,7 +62,7 @@ testfnc <- function(found_file, source_dir, target_dir = NULL, file_suffix = NUL
   classFile <- sub("pixelGroupMap", "standClass", new_full_path)
   # browser()
   # write it
-  terra::writeRaster(classRast, classFile, overwrite = TRUE)
+  terra::writeRaster(classRast, classFile, datatype = "INT1U", overwrite = TRUE)
   # and write the pixel group map raster too
   terra::writeRaster(pixelGroupMap, new_full_path, overwrite = TRUE)
 }
