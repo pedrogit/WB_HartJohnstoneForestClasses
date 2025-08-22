@@ -22,7 +22,7 @@ sumRelBs <- function(DT, match) {
 # Class cohort data in preparation to be reclassified as lichen 
 # by another module.
 ##################################################################
-classStand <- function(DT, jackPineFact, larchFact, spruceFact, pb = NULL){
+classStand <- function(DT, jackPineFact, larchFact, spruceFact, pb = NULL, tickFreq){
   # set species percentages
   sprucePct <- sumRelBs(DT, spruceFact)
   jackPinePct <- sumRelBs(DT, jackPineFact)
@@ -41,8 +41,8 @@ classStand <- function(DT, jackPineFact, larchFact, spruceFact, pb = NULL){
                                               6  # mixed 
           )))))
 
-  if (!is.null(pb) && first(DT$pgid) %% 100 == 0){
-    myTick(pb = pb)
+  if (!is.null(pb) && first(DT$pgid) %% tickFreq == 0){
+    myTick(pb = pb, len = tickFreq)
   }
   return(type)
 }
@@ -85,11 +85,12 @@ getCohortSpeciesFactors <- function(cohortData, speciesMatch){
 classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruceSp, time = 0) {
   saveClassSummaryTable <- TRUE
   labels = c("jackpine", "larch", "spruce", "conimix", "deci", "mixed")
-  levels = c(1, 2, 3, 4, 5, 6)
+  levels = c(1L, 2L, 3L, 4L, 5L, 6L)
   colors <- c("#ADFF2F", "#0DFF2F", "#228B22", "#225522", "#B22222", "#8B4513")
   jackPineFact <- getCohortSpeciesFactors(cohortData, jackPineSp)
   larchFact <- getCohortSpeciesFactors(cohortData, larchSp)
   spruceFact <- getCohortSpeciesFactors(cohortData, spruceSp)
+  tickFreq = 1000L
   
   # Add the sum of biomass and the relative biomass per pixelGroup & speciesCode
   cohortDataWithB <- cohortData
@@ -110,8 +111,8 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
   data.table::setkeyv(unique_cohortDataWithB, cols = "pixelGroup")
   
   # DT[ , .SD, by = ...] method
-  unique_cohortDataWithB[, pgid := .GRP, by = pixelGroup]
-  nbGroup <- uniqueN(unique_cohortDataWithB$pgid)
+  # unique_cohortDataWithB[, pgid := .GRP, by = pixelGroup]
+  nbGroup <- uniqueN(unique_cohortDataWithB$pixelGroup)
   
   message(nbGroup, " groups to process...")
 
@@ -124,13 +125,42 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
   )
   myTick(pb = pb, len = 0) # force it to display now
   
-  # browser()
+  browser()
+  # convert the species into integer
+  unique_cohortDataWithB[, speciesNb := fcase(
+    speciesCode %in% jackPineFact, 1, # jackpine
+    speciesCode %in% larchFact,    2, # larch
+    speciesCode %in% spruceFact,   3, # spruce
+    default =                      4  # other
+  )]
+
   # assign a class to every pixelGroup
-  unique_cohortDataWithB[, standClass:= classStand(.SD, jackPineFact, larchFact, spruceFact, pb), by = pixelGroup, .SDcols = c("speciesCode", "relB", "pgid")]
-  
+  unique_cohortDataWithB[, standClass := {
+    if (.GRP %% tickFreq == 0L) myTick(pb, len=tickFreq)
+    totRelB <- sum(relB)
+    
+    jackPinePct <- sum(relB[speciesNb == 1]) / totRelB # jackpine
+    larchPct    <- sum(relB[speciesNb == 2]) / totRelB # larch
+    sprucePct   <- sum(relB[speciesNb == 3]) / totRelB # spruce
+    
+    coniPct <- sprucePct + jackPinePct + larchPct
+    deciPct <- 1 - coniPct
+    dominancePct <- 2/3
+    
+    fcase(
+      jackPinePct >= dominancePct, 1L, # jackpine
+      larchPct    >= 0.75,         2L, # larch
+      sprucePct   >= dominancePct, 3L, # spruce
+      coniPct     >= dominancePct, 4L, # conimix
+      deciPct     >  dominancePct,5L, # deci 
+      default =                    6L  # mixed
+    )
+  }, by = pixelGroup]
+  #unique_cohortDataWithB[, standClass:= classStand(.SD, jackPineFact, larchFact, spruceFact, pb, tickFreq), by = pixelGroup, .SDcols = c("speciesCode", "relB", "pgid")]
+
   # display the last iteration of the progress bar if it was not
-  if (nbGroup %% 100 != 0) {
-    myTick(pb = pb,len = nbGroup %% 100)
+  if (nbGroup %% tickFreq != 0) {
+    myTick(pb = pb,len = nbGroup %% tickFreq)
   }
 
   # Save a summary row for each pixelGroup (to visually validate the classification)
