@@ -84,7 +84,7 @@ doEvent.standClass = function(sim, eventTime, eventType) {
     save = {
       # Save the reclassified raster
       fname <- file.path(outputPath(sim), paste0("standClass_", sprintf("%03d", time(sim)), ".tif"))
-      terra::writeRaster(sim$standClassRast, fname, overwrite = TRUE)
+      terra::writeRaster(sim$standClassRast, fname, datatype = "INT1U", overwrite = TRUE)
 
       # Reschedule the event
       sim <- scheduleEvent(sim, time(sim) + P(sim)$.saveInterval, "standClass", "save", 2)
