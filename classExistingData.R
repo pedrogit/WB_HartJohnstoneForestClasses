@@ -6,10 +6,6 @@ library(terra)
 source("G:/Home/MyTests/reclassModel/modules/standClass/R/standClass.r")
 source("G:/Home/MyTools/myFunctions.R")
 
-# data.table::getDTthreads()
-# data.table::setDTthreads(2)
-# data.table::setDTthreads(20)
-
 ######################################################
 # Development
 ######################################################
@@ -17,10 +13,9 @@ dataFolder <- "G:/Home/FromMaria/CanESM2_run1"
 
 cohortData <- as.data.table(readRDS(file.path(dataFolder, "cohortData_year2011.rds")))
 
-cohortData = cohortData[pixelGroup<=1000000]
+#cohortData = cohortData[pixelGroup<=1000000]
 length(unique(cohortData$pixelGroup))
 pixelGroupMap <- rast(readRDS(file.path(dataFolder, "pixelGroupMap_year2011.rds")))
-
 classRast <- classifyStand(cohortData, pixelGroupMap, 
                            jackPineSp = c("Pinu_Ban"), 
                            larchSp = c("Lari"), 
