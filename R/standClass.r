@@ -35,9 +35,10 @@ getCohortSpeciesFactors <- function(cohortData, speciesMatch){
 ##################################################################
 classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruceSp, time = 0) {
   saveClassSummaryTable <- TRUE
-  labels = c("jackpine", "larch", "spruce", "conimix", "deci", "mixed")
+  labels = c("deci", "mixed", "conimix", "jackpine", "larch", "spruce")
   levels = c(1L, 2L, 3L, 4L, 5L, 6L)
-  colors <- c("#ADFF2F", "#0DFF2F", "#228B22", "#225522", "#B22222", "#8B4513")
+  #colors <- c("#B22222", "#8B4513", "#225522", "#ADFF2F", "#0DFF2F", "#228B22")
+  colors <- c("#66c2a5", "#fc8d62", "#8da0cb", "#e78ac3", "#a6d854", "#ffd92f")
   
   # Convert species names to factors ids
   jackPineFact <- getCohortSpeciesFactors(cohortData, jackPineSp)
@@ -70,13 +71,14 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
   
   # Determine the stand class based on relative biomass
   dominancePct <- 2/3 # Set a dominance threshold
+
   cdWithPcts[, standClass := fcase(
-    (jackPineTotB / totB) >= dominancePct,                                 1L, # jackpine
-    (larchTotB / totB)    >= 0.75,                                         2L, # larch
-    (spruceTotB / totB)   >= dominancePct,                                 3L, # spruce
-    ((jackPineTotB + larchTotB + spruceTotB) / totB) >= dominancePct,      4L, # conimix
-    (1 - ((jackPineTotB + larchTotB + spruceTotB) / totB)) > dominancePct, 5L, # deci 
-    default =                                                              6L # mixed
+    (jackPineTotB / totB) >= dominancePct,                                 match("jackpine", labels),
+    (larchTotB / totB)    >= 0.75,                                         match("larch", labels),
+    (spruceTotB / totB)   >= dominancePct,                                 match("spruce", labels),
+    ((jackPineTotB + larchTotB + spruceTotB) / totB) >= dominancePct,      match("conimix", labels),
+    (1 - ((jackPineTotB + larchTotB + spruceTotB) / totB)) > dominancePct, match("deci", labels), 
+    default =                                                              match("mixed", labels)
   )]
 
   # Save a summary row for each pixelGroup (to visually validate the classification)
