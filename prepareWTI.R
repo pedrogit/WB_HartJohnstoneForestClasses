@@ -8,7 +8,7 @@ inRast <- rast(file.path(TWIRasterFolder, "TWI_boreal_forest_30m.tif"))
 
 outFilename <- "TWI_boreal_forest_250m.tif"
 
-newRast <- postProcessTo(rast,
+newRast <- postProcessTo(inRast,
                          rasterToMatch = pixelGroupMap,
                          maskWithRTM  = TRUE,
                          writeTo = file.path(TWIRasterFolder, outFilename), 
