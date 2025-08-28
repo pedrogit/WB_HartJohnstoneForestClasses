@@ -6,7 +6,18 @@ pixelGroupMap <- rast(readRDS(file.path(pgmFolder, "pixelGroupMap_year2011.rds")
 TWIRasterFolder <- "G:/Home/FromAndres/TWI/"
 inRast <- rast(file.path(TWIRasterFolder, "TWI_boreal_forest_30m.tif"))
 
-outFilename <- "TWI_boreal_forest_250m.tif"
+outFilename <- "TWI_boreal_forest_250m_average.tif"
+
+newRast <- postProcessTo(inRast,
+                         rasterToMatch = pixelGroupMap,
+                         maskWithRTM  = TRUE,
+                         writeTo = file.path(TWIRasterFolder, outFilename), 
+                         method = "average",
+                         overwrite = TRUE,
+                         verbose = 10
+)
+
+outFilename <- "TWI_boreal_forest_250m_bilinear.tif"
 
 newRast <- postProcessTo(inRast,
                          rasterToMatch = pixelGroupMap,
