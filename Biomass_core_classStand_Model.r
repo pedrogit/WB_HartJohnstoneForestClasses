@@ -196,7 +196,8 @@ sim <- simInit(
     )
     , standClass = list(standClassTimeStep = modelTimeStep,
                         .saveInitialTime = 0,
-                        .saveInterval = modelTimeStep)
+                        .saveInterval = modelTimeStep,
+                        useDrainage = FALSE)
   ),
   objects = list(
     cohortData = cohortData,

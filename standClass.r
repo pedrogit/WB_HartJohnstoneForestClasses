@@ -34,7 +34,11 @@ defineModule(sim, list(
     defineParameter("larchSp", "character", c("Lari"), NA, NA,
                     "List of larch species. Can also be the whole genus: \"Lari\""),
     defineParameter("spruceSp", "character", c("Pice"), NA, NA,
-                    "List of larch species. Can also be the whole genus: \"Pice\"")
+                    "List of larch species. Can also be the whole genus: \"Pice\""),
+    defineParameter("useDrainage", "logical", TRUE, NA, NA,
+                    "Weither to use the provided TWI drainage map to refine spruce classes into poorly-drained spruce (pd_spruce) and well-drained sprice (wd_spruce)"),
+    defineParameter("drainageThreshold", "numeric", 15.0, NA, NA,
+                    "Numeric TWI threshold between well drained sites and poorly drained sites")
   ),
   inputObjects = bindrows(
     expectsInput("cohortData",  "data.table",
@@ -43,6 +47,8 @@ defineModule(sim, list(
                               "Columns: B, pixelGroup, speciesCode")),
     expectsInput("pixelGroupMap", "RasterLayer",
                  desc = "Initial community map that has mapcodes match initial community table"),
+    expectsInput("drainageMap", "RasterLayer",
+                 desc = "TWI soil drainage index raster"),
     ),
 
   outputObjects = bindrows(
@@ -65,11 +71,13 @@ doEvent.standClass = function(sim, eventTime, eventType) {
 
     classifyStand = {
       sim$standClassRast <- classifyStand(cohortData = sim$cohortData, 
-                                      pixelGroupMap = sim$pixelGroupMap,
-                                      jackPineSp = P(sim)$jackPineSp,
-                                      larchSp = P(sim)$larchSp,
-                                      spruceSp = P(sim)$spruceSp,
-                                      time(sim))
+                                          pixelGroupMap = sim$pixelGroupMap,
+                                          jackPineSp = P(sim)$jackPineSp,
+                                          larchSp = P(sim)$larchSp,
+                                          spruceSp = P(sim)$spruceSp,
+                                          drainageMap = sim$drainageMap,
+                                          drainageThreshold = P(sim)$drainageThreshold,
+                                          time(sim))
 
       sim <- scheduleEvent(sim, time(sim) + P(sim)$standClassTimeStep, "standClass", "classifyStand", 1)
 
@@ -114,6 +122,10 @@ doEvent.standClass = function(sim, eventTime, eventType) {
     #                            #writeTo = "RTM.tif"
     #                            )
     sim$pixelGroupMap <- rast(data$pixelGroupMap)
+  }
+  sim$drainageMap <- NULL
+  if (P(sim)$useDrainage){
+    sim$drainageMap <- rast(file.path(dataPath(sim), "TWI_NWT_250m.tif"))
   }
 
   return(invisible(sim))

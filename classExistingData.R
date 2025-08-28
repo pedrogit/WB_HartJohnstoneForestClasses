@@ -11,15 +11,23 @@ source("G:/Home/MyTools/myFunctions.R")
 ######################################################
 dataFolder <- "G:/Home/FromMaria/CanESM2_run1"
 
+
 cohortData <- as.data.table(readRDS(file.path(dataFolder, "cohortData_year2011.rds")))
 
 #cohortData = cohortData[pixelGroup<=1000000]
 length(unique(cohortData$pixelGroup))
 pixelGroupMap <- rast(readRDS(file.path(dataFolder, "pixelGroupMap_year2011.rds")))
+
+drainageMapFolder <- "G:/Home/MyTests/reclassModel/modules/standClass/data"
+drainageMap <- rast(file.path(drainageMapFolder, "TWI_NWT_250m.tif"))
+
 classRast <- classifyStand(cohortData, pixelGroupMap, 
                            jackPineSp = c("Pinu_Ban"), 
                            larchSp = c("Lari"), 
-                           spruceSp = c("Pice"))
+                           spruceSp = c("Pice"),
+                           drainageMap = drainageMap,
+                           drainageThreshold = 15,
+                          )
 summary(classRast)
 hist(classRast)
 fname <- file.path("G:/Home/FromMariaOutput", "standclass_year2011.tif")

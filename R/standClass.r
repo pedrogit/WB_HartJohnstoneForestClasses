@@ -33,7 +33,7 @@ getCohortSpeciesFactors <- function(cohortData, speciesMatch){
 # Class a whole cohort data table based on relative biomass
 # For now classifyStand does not modify cohortData. It only produces a raster.
 ##################################################################
-classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruceSp, time = 0) {
+classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruceSp, drainageMap = NULL, drainageThreshold = NULL, time = 0) {
   saveClassSummaryTable <- TRUE
   labels = c("deci", "mixed", "conimix", "jackpine", "larch", "spruce")
   levels = c(1L, 2L, 3L, 4L, 5L, 6L)
@@ -105,6 +105,19 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
                                                 fullRaster = pixelGroupMap,
                                                 mapcode = "pixelGroup", 
                                                 newRasterCols ="standClass")
+
+  # refine spruce classification with drainage map if it is provided
+  if (!is.null(drainageMap) && !is.null(drainageThreshold)) {
+    message("Refine the spruce class based on drainage...")
+    # add color palette values for well and poorly drained spruce
+    labels <- c(labels[-length(labels)], "wd_spruce", "pd_spruce")
+    levels <- c(levels, 7L)
+    colors <- c(colors, "#1b4f72")
+
+    standClassRast <- ifel(standClassRast == match("wd_spruce", labels), 
+                        ifel(drainageMap < drainageThreshold, match("wd_spruce", labels), match("pd_spruce", labels)),
+                        standClassRast)
+  }
   
   # rasterizeReduced might produce a RasterLayer object if pixelGroupMap is a RasterLayer
   if ("SpatRaster" %in% class(standClassRast)) {
