@@ -107,7 +107,7 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
                                                    newRasterCols ="standClass")
 
   # refine spruce classification with drainage map if it is provided
-  if (!is.null(drainageMap) && !is.null(drainageThreshold)) {
+  if (!is.null(drainageMap) && !is.na(drainageMap) && !is.null(drainageThreshold)) {
     message("Refine the spruce class based on drainage...")
     # add color palette values for well and poorly drained spruce
     labels <- c(labels[-length(labels)], "wd_spruce", "pd_spruce")

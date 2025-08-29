@@ -75,7 +75,7 @@ doEvent.standClass = function(sim, eventTime, eventType) {
                                           jackPineSp = P(sim)$jackPineSp,
                                           larchSp = P(sim)$larchSp,
                                           spruceSp = P(sim)$spruceSp,
-                                          drainageMap = sim$drainageMap,
+                                          drainageMap = ifelse(P(sim)$useDrainage, sim$drainageMap, NA),
                                           drainageThreshold = P(sim)$drainageThreshold,
                                           time(sim))
 
@@ -156,6 +156,13 @@ doEvent.standClass = function(sim, eventTime, eventType) {
       
       sim$drainageMap <- drainageMap
       #sim$drainageMap <- rast(file.path(dataPath(sim), "TWI_NWT_250m.tif"))
+    }
+    else {
+      if (!compareGeom(sim$pixelGroupMap, sim$drainageMap, 
+                       stopOnError = FALSE, warncrs = TRUE)){
+        message("drainageMap supplied but is not compatible with pixelGroupMap. Setting useDrainage parameter to FALSE...")
+        params(sim)$standClass$useDrainage <- FALSE
+      }
     }
   }
   else {
