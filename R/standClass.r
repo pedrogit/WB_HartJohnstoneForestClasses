@@ -102,9 +102,9 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
   # Create a reduced list of types per pixelGroups to be rasterized
   message("Creating standClass raster...")
   standClassRast <- SpaDES.tools::rasterizeReduced(reduced = cdWithPcts,
-                                                fullRaster = pixelGroupMap,
-                                                mapcode = "pixelGroup", 
-                                                newRasterCols ="standClass")
+                                                   fullRaster = pixelGroupMap,
+                                                   mapcode = "pixelGroup", 
+                                                   newRasterCols ="standClass")
 
   # refine spruce classification with drainage map if it is provided
   if (!is.null(drainageMap) && !is.null(drainageThreshold)) {
@@ -115,8 +115,8 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
     colors <- c(colors, "#1b4f72")
 
     standClassRast <- ifel(standClassRast == match("wd_spruce", labels), 
-                        ifel(drainageMap < drainageThreshold, match("wd_spruce", labels), match("pd_spruce", labels)),
-                        standClassRast)
+                      ifel(drainageMap < drainageThreshold, match("wd_spruce", labels), match("pd_spruce", labels)),
+                      standClassRast)
   }
   
   # rasterizeReduced might produce a RasterLayer object if pixelGroupMap is a RasterLayer
