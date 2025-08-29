@@ -105,28 +105,62 @@ doEvent.standClass = function(sim, eventTime, eventType) {
 
 .inputObjects <- function(sim) {
 
-  #cacheTags <- c(currentModule(sim), "function:.inputObjects") ## uncomment this if Cache is being used
-  dPath <- asPath(getOption("reproducible.destinationPath", dataPath(sim)), 1)
-  message(currentModule(sim), ": using dataPath '", dPath, "'.")
-  data <- qread(file.path(modulePath(sim), "standClass/data/simOutDataPrep_AB.qs"))
-  if (!suppliedElsewhere("cohortData", sim)) {
-    message("cohortData not supplied. Please provide one. Using dummy dataset...")
-    sim$cohortData <- data$cohortData
-  }
   if(!suppliedElsewhere("pixelGroupMap", sim)){
-    message("pixelGrouMap not supplied. Please provide one. Using dummy dataset...")
-    # sim$pixelGroupMap <- Cache(LandR::prepInputsLCC,
-    #                            year = 2005,
-    #                            destinationPath = Paths$inputPath,
-    #                            studyArea = sim$studyArea #,
-    #                            #writeTo = "RTM.tif"
-    #                            )
-    sim$pixelGroupMap <- rast(data$pixelGroupMap)
+    nbGroup <- 200
+    pixelGroupRastWidth <- 1000
+    message("pixelGrouMap not supplied. Please provide one. Creating random map ", 
+            pixelGroupRastWidth, 
+            " pixels by ", 
+            pixelGroupRastWidth, 
+            " pixels with ",
+            nbGroup,
+            " groups...")
+
+    sim$pixelGroupMap <- getRandomPixelGroupMap(origin = c(1541912, 1072021),
+                                                width = pixelGroupRastWidth,
+                                                crs = "ESRI:102002",
+                                                nbPixelGroup = nbGroup)
+    # mapView(sim$pixelGroupMap)
   }
-  sim$drainageMap <- NULL
+  
+  if (!suppliedElsewhere("cohortData", sim)) {
+    nbGroup <- length(unique(values(sim$pixelGroupMap)))
+    message("cohortData not supplied. Please provide one. Generating random cohort data for ",
+            nbGroup, " pixel groups...")
+    sim$cohortData <- getRandomCohortData(nbPixelGroup = nbGroup, 
+                                          pixelSize = res(sim$pixelGroupMap)[1])
+  }
+
   if (P(sim)$useDrainage){
-    sim$drainageMap <- rast(file.path(dataPath(sim), "TWI_NWT_250m.tif"))
+    message("useDrainage set to TRUE. Using drainage map...")
+    if (!suppliedElsewhere("drainageMap", sim)){
+      minD <- 0
+      maxD <- 30
+      message("drainageMap not supplied. Please provide one. Generating random ",
+              "drainage map aligned on pixelGroupMap with values from ",
+              minD, " to ", maxD, "...")
+
+      groups <- unique(values(sim$pixelGroupMap))
+      ext = terra::ext(sim$pixelGroupMap)
+      drainageMap <- getRandomPixelGroupMap(origin = c(ext$xmin, ext$ymin),
+                                            width = ncol(sim$pixelGroupMap),
+                                            crs = crs(sim$pixelGroupMap),
+                                            nbPixelGroup = length(groups))
+      
+      newValues <- sample(minD:maxD, length(groups), replace=TRUE)
+      reclassMatrix <- cbind(groups, newValues)
+      
+      # Apply reclassification
+      drainageMap <- classify(drainageMap, reclassMatrix)
+      # mapView(drainageMap)
+      
+      sim$drainageMap <- drainageMap
+      #sim$drainageMap <- rast(file.path(dataPath(sim), "TWI_NWT_250m.tif"))
+    }
   }
+  else {
+    message("useDrainage set to FALSE. Not using any drainage map...")
+  } 
 
   return(invisible(sim))
 }

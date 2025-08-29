@@ -175,11 +175,12 @@ options(spades.DTthreads = 20)
 #--- simInit
 
 # To run the standClass module by itself
-# sim <- simInit(times = list(start = 0, end = 0),
-#                  modules = list("standClass"),
-#                  params = list(standClass = list(standClassTimeStep = 1,
-#                                                  .saveInitialTime = 0,
-#                                                  .saveInterval = modelTimeStep)))
+sim <- simInit(times = list(start = 0, end = 0),
+                 modules = list("standClass"),
+                 params = list(standClass = list(standClassTimeStep = 1,
+                                                 .saveInitialTime = 0,
+                                                 .saveInterval = modelTimeStep,
+                                                 useDrainage = TRUE)))
 
 # To run the standClass module in conjunction with Biomass_core
 sim <- simInit(
@@ -214,5 +215,4 @@ sim <- simInit(
 )
 
 sim <- spades(sim)
-
 
