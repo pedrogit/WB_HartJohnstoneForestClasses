@@ -3,7 +3,7 @@ library(dplyr)
 library(parallel)
 library(progress)
 library(terra)
-source("G:/Home/MyTests/reclassModel/modules/standClass/R/standClass.r")
+source("G:/Home/MyTests/reclassModel/modules/WB_HartJohnstoneForestClasses/R/WB_HartJohnstoneForestClasses.r")
 source("G:/Home/MyTools/myFunctions.R")
 
 ######################################################
@@ -18,7 +18,7 @@ cohortData <- as.data.table(readRDS(file.path(dataFolder, "cohortData_year2011.r
 length(unique(cohortData$pixelGroup))
 pixelGroupMap <- rast(readRDS(file.path(dataFolder, "pixelGroupMap_year2011.rds")))
 
-drainageMapFolder <- "G:/Home/MyTests/reclassModel/modules/standClass/data"
+drainageMapFolder <- "G:/Home/MyTests/reclassModel/modules/WB_HartJohnstoneForestClasses/data"
 drainageMap <- rast(file.path(drainageMapFolder, "TWI_NWT_250m.tif"))
 
 classRast <- classifyStand(cohortData, pixelGroupMap, 
@@ -62,7 +62,7 @@ testfnc <- function(found_file, source_dir, target_dir = NULL, file_suffix = NUL
                              spruceSp = c("Pice"))
   
   # build the target file name for the class raster
-  classFile <- sub("pixelGroupMap", "standClass", new_full_path)
+  classFile <- sub("pixelGroupMap", "WB_HartJohnstoneForestClasses", new_full_path)
   # browser()
   # write it
   terra::writeRaster(classRast, classFile, datatype = "INT1U", overwrite = TRUE)
