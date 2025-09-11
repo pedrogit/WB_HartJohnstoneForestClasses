@@ -52,7 +52,7 @@ defineModule(sim, list(
     ),
 
   outputObjects = bindrows(
-    createsOutput("WB_HartJohnstoneForestClassesRast", "RasterLayer",
+    createsOutput("WB_HartJohnstoneForestClassesMap", "RasterLayer",
                   desc = paste("classification of cohort data into pre-defined",
                                "vegetation classes")),
   )
@@ -70,7 +70,7 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
     },
 
     classifyStand = {
-      sim$WB_HartJohnstoneForestClassesRast <- classifyStand(cohortData = sim$cohortData, 
+      sim$WB_HartJohnstoneForestClassesMap <- classifyStand(cohortData = sim$cohortData, 
                                           pixelGroupMap = sim$pixelGroupMap,
                                           jackPineSp = P(sim)$jackPineSp,
                                           larchSp = P(sim)$larchSp,
@@ -85,14 +85,14 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
     },
 
     plot = {
-      Plot(sim$WB_HartJohnstoneForestClassesRast)
+      Plot(sim$WB_HartJohnstoneForestClassesMap)
       sim <- scheduleEvent(sim, time(sim) + P(sim)$.plotInterval, "WB_HartJohnstoneForestClasses", "plot", 2)
     },
 
     save = {
       # Save the reclassified raster
       fname <- file.path(outputPath(sim), paste0("WB_HartJohnstoneForestClasses_", sprintf("%03d", time(sim)), ".tif"))
-      terra::writeRaster(sim$WB_HartJohnstoneForestClassesRast, fname, datatype = "INT1U", overwrite = TRUE)
+      terra::writeRaster(sim$WB_HartJohnstoneForestClassesMap, fname, datatype = "INT1U", overwrite = TRUE)
 
       # Reschedule the event
       sim <- scheduleEvent(sim, time(sim) + P(sim)$.saveInterval, "WB_HartJohnstoneForestClasses", "save", 2)

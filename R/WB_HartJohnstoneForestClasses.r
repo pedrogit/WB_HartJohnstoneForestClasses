@@ -101,7 +101,7 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
   # Rasterize
   # Create a reduced list of types per pixelGroups to be rasterized
   message("Creating WB_HartJohnstoneForestClasses raster...")
-  WB_HartJohnstoneForestClassesRast <- SpaDES.tools::rasterizeReduced(reduced = cdWithPcts,
+  WB_HartJohnstoneForestClassesMap <- SpaDES.tools::rasterizeReduced(reduced = cdWithPcts,
                                                    fullRaster = pixelGroupMap,
                                                    mapcode = "pixelGroup", 
                                                    newRasterCols ="WB_HartJohnstoneForestClasses")
@@ -114,21 +114,21 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
     levels <- c(levels, 7L)
     colors <- c(colors, "#1b4f72")
 
-    WB_HartJohnstoneForestClassesRast <- ifel(WB_HartJohnstoneForestClassesRast == match("wd_spruce", labels), 
+    WB_HartJohnstoneForestClassesMap <- ifel(WB_HartJohnstoneForestClassesMap == match("wd_spruce", labels), 
                       ifel(drainageMap < drainageThreshold, match("wd_spruce", labels), match("pd_spruce", labels)),
-                      WB_HartJohnstoneForestClassesRast)
+                      WB_HartJohnstoneForestClassesMap)
   }
   
   # rasterizeReduced might produce a RasterLayer object if pixelGroupMap is a RasterLayer
-  if ("SpatRaster" %in% class(WB_HartJohnstoneForestClassesRast)) {
-    levels(WB_HartJohnstoneForestClassesRast) <- data.frame(ID = levels, class = labels)
-    coltab(WB_HartJohnstoneForestClassesRast) <- cbind(ID = levels, col = colors)
+  if ("SpatRaster" %in% class(WB_HartJohnstoneForestClassesMap)) {
+    levels(WB_HartJohnstoneForestClassesMap) <- data.frame(ID = levels, class = labels)
+    coltab(WB_HartJohnstoneForestClassesMap) <- cbind(ID = levels, col = colors)
   }
   else {
-    message("Could not write levels and color palette to WB_HartJohnstoneForestClassesRast because it is derived from pixelGroupMap which is not a SpatRaster raster...")
+    message("Could not write levels and color palette to WB_HartJohnstoneForestClassesMap because it is derived from pixelGroupMap which is not a SpatRaster raster...")
   }
     
-  return(WB_HartJohnstoneForestClassesRast)
+  return(WB_HartJohnstoneForestClassesMap)
 }
 
 
