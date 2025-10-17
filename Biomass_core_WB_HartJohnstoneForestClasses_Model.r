@@ -32,30 +32,21 @@ values(ecoregionMap) <- 1
 levels(ecoregionMap) <- data.frame(ID = 1, ecoregionGroup = "1_09")
 # mapview(ecoregionMap)
 
-# ecoregionMap_poly <- as.polygons(rast(ecoregionMap)) |> sf::st_as_sf()
-# mapview(ecoregionMap_poly, color = "green", lwd = 3, col.regions = NA, alpha.regions = 0) + mapview(pixelGroupMap)
-
 # Create a ecoregion table
 ecoregion <- data.table(
   ecoregion = 1:1,
   names = c("1_09"),
   active = c("yes"),
   ecoregionGroup = as.factor(1:1)
-  # Add any other expected columns if required by your modules
 )
 
 # Create a studyArea polygon (simple square around the raster)
 studyArea <- as.polygons(ext(pixelGroupMap), crs = crs(pixelGroupMap))
 
-# crs(poly) <- crs(rtm)  # assign same CRS
-# studyArea <- SpatialPolygonsDataFrame(poly, data = data.frame(ID = 1))
 # mapview(studyArea, color = "red", lwd = 3, col.regions = NA, alpha.regions = 0) + mapview(pixelGroupMap)
 # writeVector(studyArea, file.path(getPaths()$input,"studyArea.shp"), filetype = "ESRI Shapefile", overwrite=TRUE)
 
 # Create the cohortData table
-
-# pixel_groups <- 0:9
-# species_levels <- c("Pinu_ban", "Pice_mar", "Betu_pap", "Abie_bal", "Acer_sac")
 species_levels <- c("Pinu_ban", "Pice_mar", "Betu_pap", "Popu_tre", "Acer_rub")
 
 # set.seed(42)
