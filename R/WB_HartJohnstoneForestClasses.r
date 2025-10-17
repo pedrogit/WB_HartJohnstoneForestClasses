@@ -82,6 +82,7 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
   )]
 
   # Save a summary row for each pixelGroup (to visually validate the classification)
+  # This does not include the spruce class drainage refinement which is a raster based process
   if (saveClassSummaryTable && exists("getPaths", mode = "function")) {
     fname <- file.path(getPaths()$outputPath, paste0("WB_HartJohnstoneForestClasses_", sprintf("%03d", time), ".csv"))
     message("Save classification summary table to \"", fname, "\"...")
@@ -106,10 +107,10 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
                                                    mapcode = "pixelGroup", 
                                                    newRasterCols ="WB_HartJohnstoneForestClasses")
 
-  # refine spruce classification with drainage map if it is provided
+  # Refine spruce classification with drainage map if it is provided
   if (!is.null(drainageMap) && !is.na(drainageMap) && !is.null(drainageThreshold)) {
     message("Refine the spruce class based on drainage...")
-    # add color palette values for well and poorly drained spruce
+    # Add color palette values for well and poorly drained spruce
     labels <- c(labels[-length(labels)], "wd_spruce", "pd_spruce")
     levels <- c(levels, 7L)
     colors <- c(colors, "#1b4f72")

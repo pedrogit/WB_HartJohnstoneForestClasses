@@ -149,7 +149,7 @@ options(spades.DTthreads = 20)
 
 #--- simInit
 
-# To run the WB_HartJohnstoneForestClasses module by itself
+# Run the WB_HartJohnstoneForestClasses module by itself
 # sim <- simInit(times = list(start = 0, end = 0),
 #                  modules = list("WB_HartJohnstoneForestClasses"),
 #                  params = list(WB_HartJohnstoneForestClasses = list(WB_HartJohnstoneForestClassesTimeStep = 1,
@@ -161,7 +161,8 @@ options(spades.DTthreads = 20)
 #                  )
 #                )
 
-# To run the WB_HartJohnstoneForestClasses module in conjunction with Biomass_core
+
+# Run a model with WB_HartJohnstoneForestClasses module in conjunction with Biomass_core
 sim <- simInit(
   times = list(start = 0, end = 20),
   modules = list("Biomass_core", "WB_HartJohnstoneForestClasses"),

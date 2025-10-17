@@ -108,10 +108,10 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
   if(!suppliedElsewhere("pixelGroupMap", sim)){
     nbGroup <- 200
     pixelGroupRastWidth <- 1000
-    message("pixelGrouMap not supplied. Please provide one. Creating random map ", 
-            pixelGroupRastWidth, 
-            " pixels by ", 
-            pixelGroupRastWidth, 
+    message("##############################################################################")   
+    message("pixelGrouMap not supplied.")   
+    message("Please provide one. Creating random map ", pixelGroupRastWidth, " pixels by ", 
+            pixelGroupRastWidth, " pixels with ", nbGroup, " groups...")
             " pixels with ",
             nbGroup,
             " groups...")
@@ -125,20 +125,21 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
   
   if (!suppliedElsewhere("cohortData", sim)) {
     nbGroup <- length(unique(values(sim$pixelGroupMap)))
-    message("cohortData not supplied. Please provide one. Generating random cohort data for ",
-            nbGroup, " pixel groups...")
+    message("##############################################################################")   
+    message("cohortData not supplied.")   
+    message("Please provide one. Generating random cohort data for ", nbGroup, " pixel groups...")
     sim$cohortData <- getRandomCohortData(nbPixelGroup = nbGroup, 
                                           pixelSize = res(sim$pixelGroupMap)[1])
   }
 
   if (P(sim)$useDrainage){
-    message("useDrainage set to TRUE. Using drainage map...")
-    if (!suppliedElsewhere("drainageMap", sim)){
+    message("##############################################################################")   
+    message("useDrainage set to TRUE. Using WB_VegBasedDrainageMap to refine the spruce classes into well drained and poorly drained spruce...")
       minD <- 0
       maxD <- 30
-      message("drainageMap not supplied. Please provide one. Generating random ",
-              "drainage map aligned on pixelGroupMap with values from ",
-              minD, " to ", maxD, "...")
+      message("WB_VegBasedDrainageMap not supplied.")
+      message("Please couple with the WB_VegBasedDrainage module. Generating random ",
+              "drainage map aligned on pixelGroupMap with well drained and poorly drained values...")
 
       groups <- unique(values(sim$pixelGroupMap))
       ext = terra::ext(sim$pixelGroupMap)
