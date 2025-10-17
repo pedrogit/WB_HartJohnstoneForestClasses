@@ -8,6 +8,7 @@ library(LandR)
 library(mapview)
 library(terra)
 library(data.table)
+library(caret)
 
 #installMyPackages()
 
@@ -156,8 +157,10 @@ options(spades.DTthreads = 20)
 # Run a model with WB_HartJohnstoneForestClasses module in conjunction with Biomass_core
 sim <- simInit(
   times = list(start = 0, end = 20),
-  modules = list("Biomass_core", "WB_HartJohnstoneForestClasses"),
+  modules = list("Biomass_core", "WB_HartJohnstoneForestClasses", "WB_VegBasedDrainage"),
+  # modules = list("Biomass_core", "WB_HartJohnstoneForestClasses"),
   # modules = list("Biomass_core"),
+  # modules = list("WB_VegBasedDrainage"),
   params = list(
     Biomass_core = list(successionTimestep = modelTimeStep,
                         sppEquivCol = "LandR",
@@ -165,11 +168,19 @@ sim <- simInit(
                         .plots = NA,
                         # calcSummaryBGM = NULL,
                         .useCache = FALSE
+    ),
+    
+    WB_HartJohnstoneForestClasses = list(
+      WB_HartJohnstoneForestClassesTimeStep = modelTimeStep,
+      .saveInitialTime = 0,
+      .saveInterval = modelTimeStep,
+      useDrainage = TRUE
+    ),
+    
+    WB_VegBasedDrainage = list(
+      WB_VegBasedDrainageTimeStep = modelTimeStep,
+      searchDistInPixelNb = 2
     )
-    , WB_HartJohnstoneForestClasses = list(WB_HartJohnstoneForestClassesTimeStep = modelTimeStep,
-                        .saveInitialTime = 0,
-                        .saveInterval = modelTimeStep,
-                        useDrainage = FALSE)
   ),
   objects = list(
     cohortData = cohortData,

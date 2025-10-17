@@ -36,9 +36,9 @@ defineModule(sim, list(
     defineParameter("spruceSp", "character", c("Pice"), NA, NA,
                     "List of larch species. Can also be the whole genus: \"Pice\""),
     defineParameter("useDrainage", "logical", TRUE, NA, NA,
-                    "Weither to use the provided TWI drainage map to refine spruce classes into poorly-drained spruce (pd_spruce) and well-drained sprice (wd_spruce)"),
-    defineParameter("drainageThreshold", "numeric", 15.0, NA, NA,
-                    "Numeric TWI threshold between well drained sites and poorly drained sites")
+                    paste("Whether to use the WB_VegBasedDrainage module map to refine ",
+                          "spruce classes into poorly-drained spruce (pd_spruce) and ",
+                          "well-drained sprice (wd_spruce)"))
   ),
   inputObjects = bindrows(
     expectsInput("cohortData",  "data.table",
@@ -47,8 +47,8 @@ defineModule(sim, list(
                               "Columns: B, pixelGroup, speciesCode")),
     expectsInput("pixelGroupMap", "SpatRast",
                  desc = "Initial community map that has mapcodes match initial community table"),
-    expectsInput("drainageMap", "SpatRast",
-                 desc = "TWI soil drainage index raster"),
+    expectsInput("WB_VegBasedDrainageMap", "SpatRast",
+                 desc = "WB_VegBasedDrainage drainage map raster (1 = poorly drained, 2 = well drained)"),
     ),
 
   outputObjects = bindrows(
@@ -70,15 +70,19 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
     },
 
     classifyStand = {
+      drainageMap <- NULL
+      if (P(sim)$useDrainage){
+        drainageMap <- sim$WB_VegBasedDrainageMap
+      }
+      
       sim$WB_HartJohnstoneForestClassesMap <- classifyStand(cohortData = sim$cohortData, 
                                           pixelGroupMap = sim$pixelGroupMap,
                                           jackPineSp = P(sim)$jackPineSp,
                                           larchSp = P(sim)$larchSp,
                                           spruceSp = P(sim)$spruceSp,
-                                          drainageMap = ifelse(P(sim)$useDrainage, sim$drainageMap, NA),
-                                          drainageThreshold = P(sim)$drainageThreshold,
+                                          drainageMap = drainageMap,
                                           time(sim))
-
+      
       sim <- scheduleEvent(sim, time(sim) + P(sim)$WB_HartJohnstoneForestClassesTimeStep, "WB_HartJohnstoneForestClasses", "classifyStand", 1)
 
       return(invisible(sim))
@@ -104,7 +108,8 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
 }
 
 .inputObjects <- function(sim) {
-
+  userTags <- c(currentModule(sim), "function:.inputObjects") 
+  
   if(!suppliedElsewhere("pixelGroupMap", sim)){
     nbGroup <- 200
     pixelGroupRastWidth <- 1000
@@ -112,15 +117,16 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
     message("pixelGrouMap not supplied.")   
     message("Please provide one. Creating random map ", pixelGroupRastWidth, " pixels by ", 
             pixelGroupRastWidth, " pixels with ", nbGroup, " groups...")
-            " pixels with ",
-            nbGroup,
-            " groups...")
 
-    sim$pixelGroupMap <- getRandomPixelGroupMap(origin = c(1541912, 1072021),
-                                                width = pixelGroupRastWidth,
-                                                crs = "ESRI:102002",
-                                                nbPixelGroup = nbGroup)
-    # mapView(sim$pixelGroupMap)
+    sim$pixelGroupMap <- Cache(
+      getRandomCategoricalMap,
+      origin = c(-667296, 1758502),
+      width = pixelGroupRastWidth,
+      crs = "ESRI:102002",
+      nbregion = nbGroup,
+      seed = 100,
+      userTags = c(userTags, "WB_HartJohnstoneForestClassesMap")
+    )
   }
   
   if (!suppliedElsewhere("cohortData", sim)) {
@@ -135,34 +141,21 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
   if (P(sim)$useDrainage){
     message("##############################################################################")   
     message("useDrainage set to TRUE. Using WB_VegBasedDrainageMap to refine the spruce classes into well drained and poorly drained spruce...")
-      minD <- 0
-      maxD <- 30
+    if (!suppliedElsewhere("WB_VegBasedDrainageMap", sim)){
+      message("##############################################################################")   
       message("WB_VegBasedDrainageMap not supplied.")
       message("Please couple with the WB_VegBasedDrainage module. Generating random ",
               "drainage map aligned on pixelGroupMap with well drained and poorly drained values...")
 
       groups <- unique(values(sim$pixelGroupMap))
       ext = terra::ext(sim$pixelGroupMap)
-      drainageMap <- getRandomPixelGroupMap(origin = c(ext$xmin, ext$ymin),
-                                            width = ncol(sim$pixelGroupMap),
-                                            crs = crs(sim$pixelGroupMap),
-                                            nbPixelGroup = length(groups))
-      
-      newValues <- sample(minD:maxD, length(groups), replace=TRUE)
-      reclassMatrix <- cbind(groups, newValues)
-      
-      # Apply reclassification
-      drainageMap <- classify(drainageMap, reclassMatrix)
-      # mapView(drainageMap)
-      
-      sim$drainageMap <- drainageMap
-    }
-    else {
-      if (!compareGeom(sim$pixelGroupMap, sim$drainageMap, 
-                       stopOnError = FALSE, warncrs = TRUE)){
-        message("drainageMap supplied but is not compatible with pixelGroupMap. Setting useDrainage parameter to FALSE...")
-        params(sim)$WB_HartJohnstoneForestClasses$useDrainage <- FALSE
-      }
+      sim$WB_VegBasedDrainageMap <- getRandomCategoricalMap(
+        origin = c(ext$xmin, ext$ymin),
+        width = ncol(sim$pixelGroupMap),
+        crs = crs(sim$pixelGroupMap),
+        nbregion = length(groups),
+        valuevect = 1:2
+      )
     }
   }
   else {

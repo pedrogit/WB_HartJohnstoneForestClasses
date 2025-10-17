@@ -33,7 +33,7 @@ getCohortSpeciesFactors <- function(cohortData, speciesMatch){
 # Class a whole cohort data table based on relative biomass
 # For now classifyStand does not modify cohortData. It only produces a raster.
 ##################################################################
-classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruceSp, drainageMap = NULL, drainageThreshold = NULL, time = 0) {
+classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruceSp, drainageMap = NULL, time = 0) {
   saveClassSummaryTable <- TRUE
   labels = c("deci", "mixed", "conimix", "jackpine", "larch", "spruce")
   levels = c(1L, 2L, 3L, 4L, 5L, 6L)
@@ -108,16 +108,17 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
                                                    newRasterCols ="WB_HartJohnstoneForestClasses")
 
   # Refine spruce classification with drainage map if it is provided
-  if (!is.null(drainageMap) && !is.na(drainageMap) && !is.null(drainageThreshold)) {
+  if (!is.null(drainageMap) && !all(is.na(values(drainageMap)))) {
     message("Refine the spruce class based on drainage...")
     # Add color palette values for well and poorly drained spruce
     labels <- c(labels[-length(labels)], "wd_spruce", "pd_spruce")
     levels <- c(levels, 7L)
     colors <- c(colors, "#1b4f72")
-
-    WB_HartJohnstoneForestClassesMap <- ifel(WB_HartJohnstoneForestClassesMap == match("wd_spruce", labels), 
-                      ifel(drainageMap < drainageThreshold, match("wd_spruce", labels), match("pd_spruce", labels)),
-                      WB_HartJohnstoneForestClassesMap)
+#browser()
+    WB_HartJohnstoneForestClassesMap <- 
+      ifel(WB_HartJohnstoneForestClassesMap == match("wd_spruce", labels), 
+      ifel(drainageMap == 1, match("wd_spruce", labels), match("pd_spruce", labels)),
+      WB_HartJohnstoneForestClassesMap)
   }
   
   # rasterizeReduced might produce a RasterLayer object if pixelGroupMap is a RasterLayer
@@ -128,6 +129,9 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
   else {
     message("Could not write levels and color palette to WB_HartJohnstoneForestClassesMap because it is derived from pixelGroupMap which is not a SpatRaster raster...")
   }
+  
+  names(WB_HartJohnstoneForestClassesMap) <- "standtype"
+  
     
   return(WB_HartJohnstoneForestClassesMap)
 }
