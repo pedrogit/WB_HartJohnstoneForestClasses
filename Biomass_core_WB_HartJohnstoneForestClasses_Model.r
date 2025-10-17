@@ -1,5 +1,5 @@
 source("G:/Home/MyTools/myFunctions.R")
-source("G:/Home/MyTests/reclassModel/modules/common/randomInputs.R")
+source("G:/Home/MyTests/reclassModel/modules/rutils/rutils.R")
 
 # resetSpades()
 library(SpaDES)
@@ -14,46 +14,20 @@ library(data.table)
 setBasePath("G:/Home/MyTests/reclassModel")
 getPaths() # shows where the 4 relevant paths are
 
-baseCRSRast <- Cache(
-  prepInputs,
-  url = "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/NFI_MODIS250m_2011_kNN_Species_Arbu_Men_v1.tif",
-  targetFile = "NFI_MODIS250m_2011_kNN_Species_Arbu_Men_v1.tif",  # file name inside zip, or the tif itself
-  destinationPath = getPaths()$cache,   # where to store
-  fun = terra::rast               # how to load the file
+# Create a random pixelgroupMap
+pixelGroupMap <- getRandomCategoricalMap(
+  origin = c(-667296, 1758502),
+  width = 1000,
+  crs = "ESRI:102002",
+  nbregion = 1000,
+  valuevect = 0:9,
+  seed = 100
 )
-
-# Define the study area base raster
-nrows <- 2000
-ncols <- 2000
-origin <- c(1631886,6647855)
-rtm <- terra::rast(nrows=nrows, ncols=ncols, xmin=origin[1], xmax=origin[1]+ncols, ymin=origin[2], ymax=origin[2]+nrows)
-terra::crs(rtm) <- crs(baseCRSRast)
-terra::values(rtm) <- 2
-# mapview(rtm)
-
-# Create a pixelGroupMap of cohorts for Biomass_core
-pixelGroupMap <- SpaDES.tools::neutralLandscapeMap(rtm, type="nlm_mosaictess", germs=500)
-#mapview(pixelGroupMap)
-
-# Reclass it to integer values
-m <- matrix(c(
-  0.0, 0.1, 0,
-  0.1, 0.2, 1,
-  0.2, 0.3, 2,
-  0.3, 0.4, 3,
-  0.4, 0.5, 4,
-  0.5, 0.6, 5,
-  0.6, 0.7, 6,
-  0.7, 0.8, 7,
-  0.8, 0.9, 8,
-  0.9, 1.0, 9
-), ncol = 3, byrow = TRUE)
-
-pixelGroupMap <- classify(pixelGroupMap, rcl = m)
 # mapview(pixelGroupMap)
 
+
 # Create an ecoregionMap (only one region)
-ecoregionMap <- rtm
+ecoregionMap <- pixelGroupMap
 values(ecoregionMap) <- 1
 levels(ecoregionMap) <- data.frame(ID = 1, ecoregionGroup = "1_09")
 # mapview(ecoregionMap)
@@ -71,7 +45,7 @@ ecoregion <- data.table(
 )
 
 # Create a studyArea polygon (simple square around the raster)
-studyArea <- as.polygons(ext(rtm), crs = crs(rtm))
+studyArea <- as.polygons(ext(pixelGroupMap), crs = crs(pixelGroupMap))
 
 # crs(poly) <- crs(rtm)  # assign same CRS
 # studyArea <- SpatialPolygonsDataFrame(poly, data = data.frame(ID = 1))
@@ -208,7 +182,7 @@ sim <- simInit(
   objects = list(
     cohortData = cohortData,
     pixelGroupMap = pixelGroupMap,
-    rasterToMatch = rtm,
+    rasterToMatch = pixelGroupMap,
     #species = species,
     sppNameVector = species_levels,
     minRelativeB = minRelativeB,
