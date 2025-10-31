@@ -123,7 +123,8 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
     sim$pixelGroupMap <- Cache(
       getRandomCategoricalMap,
       origin = c(-667296, 1758502),
-      width = pixelGroupRastWidth,
+      ncol = pixelGroupRastWidth,
+      nrow = pixelGroupRastWidth,
       crs = "ESRI:102002",
       nbregion = nbGroup,
       seed = 100,
