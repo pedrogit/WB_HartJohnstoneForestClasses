@@ -1,5 +1,6 @@
+basePath <- "G:/Home/archive/MyTests/reclassModel"
+
 source("G:/Home/MyTools/myFunctions.R")
-source("G:/Home/MyTests/reclassModel/modules/rutils/rutils.R")
 
 # resetSpades()
 library(SpaDES)
@@ -12,13 +13,16 @@ library(caret)
 
 #installMyPackages()
 
-setBasePath("G:/Home/MyTests/reclassModel")
+# setBasePath("G:/Home/MyTests/reclassModel")
+setBasePath(basePath)
 getPaths() # shows where the 4 relevant paths are
+source(file.path(basePath, "modules/rutils/rutils.R"))
 
 # Create a random pixelgroupMap
 pixelGroupMap <- getRandomCategoricalMap(
   origin = c(-667296, 1758502),
-  width = 1000,
+  ncol = 1000,
+  nrow = 1000,
   crs = "ESRI:102002",
   nbregion = 1000,
   valuevect = 0:9,
