@@ -75,13 +75,15 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
         drainageMap <- sim$WB_VegBasedDrainageMap
       }
       
-      sim$WB_HartJohnstoneForestClassesMap <- classifyStand(cohortData = sim$cohortData, 
-                                          pixelGroupMap = sim$pixelGroupMap,
-                                          jackPineSp = P(sim)$jackPineSp,
-                                          larchSp = P(sim)$larchSp,
-                                          spruceSp = P(sim)$spruceSp,
-                                          drainageMap = drainageMap,
-                                          time(sim))
+      sim$WB_HartJohnstoneForestClassesMap <- classifyStand(
+        cohortData = sim$cohortData, 
+        pixelGroupMap = sim$pixelGroupMap,
+        jackPineSp = P(sim)$jackPineSp,
+        larchSp = P(sim)$larchSp,
+        spruceSp = P(sim)$spruceSp,
+        drainageMap = drainageMap,
+        time(sim)
+      )
       
       sim <- scheduleEvent(sim, time(sim) + P(sim)$WB_HartJohnstoneForestClassesTimeStep, "WB_HartJohnstoneForestClasses", "classifyStand", 1)
 
