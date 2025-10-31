@@ -71,7 +71,7 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
 
     classifyStand = {
       drainageMap <- NULL
-      if (P(sim)$useDrainage){
+      if (P(sim)$useDrainage && !is.null(sim$WB_VegBasedDrainageMap)){
         drainageMap <- sim$WB_VegBasedDrainageMap
       }
       
