@@ -1,22 +1,18 @@
-basePath <- "G:/Home/archive/MyTests/reclassModel"
+modelPath <- "projects/base_withSimInit"
 
-source("G:/Home/MyTools/myFunctions.R")
+# source(file.path(modelPath, "modules/rutils/rutils.R"))
+source("https://raw.githubusercontent.com/pedrogit/rUtils/refs/heads/main/rutils.R")
 
-# resetSpades()
 library(SpaDES)
-library(SpaDES.tools)
 library(LandR)
 library(mapview)
 library(terra)
 library(data.table)
+library(whitebox)
 library(caret)
 
-#installMyPackages()
-
-# setBasePath("G:/Home/MyTests/reclassModel")
-setBasePath(basePath)
+setBasePath(modelPath)
 getPaths() # shows where the 4 relevant paths are
-source(file.path(basePath, "modules/rutils/rutils.R"))
 
 # Create a random pixelgroupMap
 pixelGroupMap <- getRandomCategoricalMap(
@@ -201,4 +197,3 @@ sim <- simInit(
 )
 
 sim <- spades(sim)
-
