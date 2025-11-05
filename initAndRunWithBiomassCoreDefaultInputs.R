@@ -8,6 +8,7 @@ library(LandR)
 library(mapview)
 library(terra)
 library(data.table)
+library(whitebox)
 library(caret)
 
 setBasePath(modelPath)
