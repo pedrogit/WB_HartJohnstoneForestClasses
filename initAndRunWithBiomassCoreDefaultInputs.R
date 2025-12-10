@@ -35,6 +35,10 @@ SpaDES.project::getModule(modulePath = getPaths()$modulePath,
                           c("pedrogit/WB_HartJohnstoneForestClasses@main"),
                           overwrite = FALSE)
 
+SpaDES.project::getModule(modulePath = getPaths()$modulePath,
+                          c("pedrogit/WB_LichenBiomass@main"),
+                          overwrite = FALSE)
+
 modelTimeStep <- 10
 options(spades.DTthreads = 20)
 
@@ -52,6 +56,7 @@ sim <- SpaDES.core::simInit(
   , "Biomass_core"
   , "WB_HartJohnstoneForestClasses"
   , "WB_VegBasedDrainage"
+  , "WB_LichenBiomass"
   ),
   params = list(
     .globals = list(sppEquivCol = 'LandR'),
@@ -78,6 +83,10 @@ sim <- SpaDES.core::simInit(
     WB_VegBasedDrainage = list(
       WB_VegBasedDrainageTimeStep = modelTimeStep,
       searchDistInPixelNb = 2
+    ),
+    
+    WB_LichenBiomass = list(
+      WB_LichenBiomassTimeStep = modelTimeStep
     )
   ),
   objects = list(
