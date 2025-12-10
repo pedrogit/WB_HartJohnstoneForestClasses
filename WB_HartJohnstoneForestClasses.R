@@ -3,7 +3,8 @@ defineModule(sim, list(
   description = paste("The aim of this module is to classify cohortData into predefined vegetation classes to be reclassified as lichen by another module"),
   keywords = c("lichen", "habitat types"),
   authors =  c(
-    person("Pierre", "Racine", email= "pierre.racine@sbf.ulaval.ca", role = "aut")
+    person("Pierre", "Racine", email= "pierre.racine@sbf.ulaval.ca", role = "cre"),
+    person("Andres", "Caseiro Guilhem", email= "andres.caseiro-guilhem.1@ulaval.ca", role = "aut")
   ),
   childModules = character(0),
   version = list(WB_HartJohnstoneForestClasses = "0.0.0.1000"),
