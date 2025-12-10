@@ -133,7 +133,7 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
   }
   
   names(WB_HartJohnstoneForestClassesMap) <- "standtype"
-  
+  varnames(WB_HartJohnstoneForestClassesMap) <- "standtype"
     
   return(WB_HartJohnstoneForestClassesMap)
 }
