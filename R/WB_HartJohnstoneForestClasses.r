@@ -33,7 +33,15 @@ getCohortSpeciesFactors <- function(cohortData, speciesMatch){
 # Class a whole cohort data table based on relative biomass
 # For now classifyStand does not modify cohortData. It only produces a raster.
 ##################################################################
-classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruceSp, drainageMap = NULL, time = 0) {
+classifyStand <- function(
+    cohortData, 
+    pixelGroupMap, 
+    jackPineSp = c("Pinu_ban"), 
+    larchSp = c("Lari"), 
+    spruceSp = c("Pice"), 
+    drainageMap = NULL, 
+    time = 0
+) {
   saveClassSummaryTable <- TRUE
   labels = c("deci", "mixed", "conimix", "jackpine", "larch", "spruce")
   levels = c(1L, 2L, 3L, 4L, 5L, 6L)
