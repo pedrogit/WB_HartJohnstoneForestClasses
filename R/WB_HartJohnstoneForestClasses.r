@@ -119,7 +119,7 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
     # 1 = poorly drained, 2 = well drained
     WB_HartJohnstoneForestClassesMap <- 
       ifel(WB_HartJohnstoneForestClassesMap == match("wd_spruce", labels), 
-      ifel(drainageMap == 1, match("wd_spruce", labels), match("pd_spruce", labels)),
+      ifel(drainageMap == 2, match("wd_spruce", labels), match("pd_spruce", labels)),
       WB_HartJohnstoneForestClassesMap)
   }
   
