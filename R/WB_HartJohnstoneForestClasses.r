@@ -45,10 +45,10 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
   larchFact <- getCohortSpeciesFactors(cohortData, larchSp)
   spruceFact <- getCohortSpeciesFactors(cohortData, spruceSp)
 
-  # Copy the main data table to avoid modifying it
+  # Copy the main data table so we do not modify the original one
   cd <- cohortData
 
-  # Convert the species into integer for faster comparison
+  # Convert the species codes into integer for faster comparison
   cd[, speciesNb := fcase(
     speciesCode %in% jackPineFact, 1, # jackpine
     speciesCode %in% larchFact,    2, # larch
@@ -108,13 +108,15 @@ classifyStand <- function(cohortData, pixelGroupMap, jackPineSp, larchSp, spruce
                                                    newRasterCols ="WB_HartJohnstoneForestClasses")
 
   # Refine spruce classification with drainage map if it is provided
+  # Refine spruce classes as well/poorly drained with drainage map if it is provided
   if (!is.null(drainageMap) && !all(is.na(values(drainageMap)))) {
     message("Refine the spruce class based on drainage...")
     # Add color palette values for well and poorly drained spruce
     labels <- c(labels[-length(labels)], "wd_spruce", "pd_spruce")
     levels <- c(levels, 7L)
     colors <- c(colors, "#1b4f72")
-#browser()
+    
+    # 1 = poorly drained, 2 = well drained
     WB_HartJohnstoneForestClassesMap <- 
       ifel(WB_HartJohnstoneForestClassesMap == match("wd_spruce", labels), 
       ifel(drainageMap == 1, match("wd_spruce", labels), match("pd_spruce", labels)),

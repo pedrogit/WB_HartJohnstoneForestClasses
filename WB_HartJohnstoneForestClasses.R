@@ -67,7 +67,7 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
     init = {
       # We initiate a fake cohortData here because it is dependent on sim$pixelGroupMap
       # We do that only if it is not supplied by another module (like Biomass_core)
-      # We have also set loadOrder to after Biomass_core so pixelGroupMap should be initialized
+      # We have also set loadOrder to "after Biomass_core" so pixelGroupMap should be initialized
       if (!suppliedElsewhere(sim$cohortData) && !is.null(sim$pixelGroupMap)) {
         nbGroup <- length(unique(values(sim$pixelGroupMap)))
         message("##############################################################################")   
