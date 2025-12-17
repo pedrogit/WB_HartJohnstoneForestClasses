@@ -62,7 +62,7 @@ defineModule(sim, list(
 
 # Events
 doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
-  browser()
+  # browser()
   switch(
     eventType,
     
@@ -163,7 +163,6 @@ reComputeHJForestClassesMap <- function(sim) {
   userTags <- c(currentModule(sim), "function:.inputObjects") 
   
   if(!suppliedElsewhere("pixelGroupMap", sim)){
-    browser()
     nbGroup <- 200
     pixelGroupRastWidth <- 1000
     message("##############################################################################")

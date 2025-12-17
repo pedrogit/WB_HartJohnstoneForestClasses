@@ -47,6 +47,12 @@ SpaDES.project::getModule(modulePath = getPaths()$modulePath,
                           c("pedrogit/WB_LichenBiomass@main"),
                           overwrite = FALSE)
 
+options = options(
+  spades.DTthreads = 20
+  , spades.cacheChaining = TRUE
+  , reproducible.useMemoise = TRUE
+  # , reproducible.interactiveOnDownloadFail = FALSE
+)
 modelTimeStep <- 10
 options(spades.DTthreads = 20)
 
@@ -70,6 +76,10 @@ sim <- SpaDES.core::simInit(
     .globals = list(sppEquivCol = 'LandR'),
     # Biomass_borealDataPrep = list(overrideAgeInFires = FALSE
     # ),
+    Biomass_speciesParameters = list(maxBInFactorial = 500,
+                                     .useCache = c(".inputObjects", "init")
+    ),
+
     Biomass_speciesData = list(
       .plots = NA
     ),
