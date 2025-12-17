@@ -62,73 +62,22 @@ defineModule(sim, list(
 
 # Events
 doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
+  browser()
   switch(
     eventType,
+    
     init = {
-      # We initiate a fake cohortData here because it is dependent on sim$pixelGroupMap
-      # We do that only if it is not supplied by another module (like Biomass_core)
-      # We have also set loadOrder to "after Biomass_core" so pixelGroupMap should be initialized
-      if (!suppliedElsewhere(sim$cohortData) && !is.null(sim$pixelGroupMap)) {
-        nbGroup <- length(unique(values(sim$pixelGroupMap)))
-        message("##############################################################################")   
-        message("cohortData not supplied.")   
-        message("Please provide one. Generating random cohort data for ", nbGroup, " pixel groups...")
-        sim$cohortData <- getRandomCohortData(nbPixelGroup = nbGroup, 
-                                              pixelSize = res(sim$pixelGroupMap)[1])
-      }
-      
-      if (P(sim)$useDrainage){
-        message("##############################################################################")   
-        message("useDrainage set to TRUE. Using WB_VegBasedDrainageMap to refine the spruce classes into well drained and poorly drained spruce...")
-        if (!suppliedElsewhere(sim$WB_VegBasedDrainageMap) && !is.null(sim$pixelGroupMap)){
-          message("##############################################################################")   
-          message("WB_VegBasedDrainageMap not supplied.")
-          message("Please couple with the WB_VegBasedDrainage module. Generating random ",
-                  "drainage map aligned on pixelGroupMap with well drained and poorly drained values...",
-                  "If you don't this, set the useDrainage parameter to FALSE.")
-          
-          groups <- unique(values(sim$pixelGroupMap))
-          ext = terra::ext(sim$pixelGroupMap)
-          sim$WB_VegBasedDrainageMap <- getRandomCategoricalMap(
-            origin = c(ext$xmin, ext$ymin),
-            ncol = ncol(sim$pixelGroupMap),
-            nrow = nrow(sim$pixelGroupMap),
-            crs = crs(sim$pixelGroupMap),
-            nbregion = length(groups),
-            valuevect = 1:2
-          )
-          sim$WB_VegBasedDrainageMap <- mask(sim$WB_VegBasedDrainageMap, sim$pixelGroupMap)
-        }
-      }
-      else {
-        message("useDrainage set to FALSE. Not using any drainage map to refine WB_HartJohnstoneForestClasses...")
-      } 
-      
+      sim <- Init(sim)
       # schedule future event(s)
-      sim <- scheduleEvent(sim, time(sim), "WB_HartJohnstoneForestClasses", "classifyStand", 1)
+      sim <- scheduleEvent(sim, time(sim), "WB_HartJohnstoneForestClasses", "reComputeHJForestClassesMap", 1)
       sim <- scheduleEvent(sim, P(sim)$.plotInitialTime, "WB_HartJohnstoneForestClasses", "plot", 2)
       sim <- scheduleEvent(sim, P(sim)$.saveInitialTime, "WB_HartJohnstoneForestClasses", "save", 2)
     },
 
-    classifyStand = {
-      drainageMap <- NULL
-      if (P(sim)$useDrainage && !is.null(sim$WB_VegBasedDrainageMap)){
-        drainageMap <- sim$WB_VegBasedDrainageMap
-      }
-      
-      sim$WB_HartJohnstoneForestClassesMap <- classifyStand(
-        cohortData = sim$cohortData, 
-        pixelGroupMap = sim$pixelGroupMap,
-        jackPineSp = P(sim)$jackPineSp,
-        larchSp = P(sim)$larchSp,
-        spruceSp = P(sim)$spruceSp,
-        drainageMap = drainageMap,
-        time(sim)
-      )
-      
+    reComputeHJForestClassesMap = {
+      # browser()
+      sim <- reComputeHJForestClassesMap(sim)
       sim <- scheduleEvent(sim, time(sim) + P(sim)$WB_HartJohnstoneForestClassesTimeStep, "WB_HartJohnstoneForestClasses", "classifyStand", 1)
-
-      return(invisible(sim))
     },
 
     plot = {
@@ -150,15 +99,76 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
   return(invisible(sim))
 }
 
+Init <- function(sim) {
+  # We initiate a fake cohortData here because it is dependent on sim$pixelGroupMap
+  # We do that only if it is not supplied by another module (like Biomass_core)
+  # We have also set loadOrder to "after Biomass_core" so pixelGroupMap should be initialized
+  if (!suppliedElsewhere(sim$cohortData) && !is.null(sim$pixelGroupMap)) {
+    nbGroup <- length(unique(values(sim$pixelGroupMap)))
+    message("##############################################################################")   
+    message("cohortData not supplied.")   
+    message("Please provide one. Generating random cohort data for ", nbGroup, " pixel groups...")
+    sim$cohortData <- getRandomCohortData(nbPixelGroup = nbGroup, 
+                                          pixelSize = res(sim$pixelGroupMap)[1])
+  }
+  
+  if (P(sim)$useDrainage){
+    message("##############################################################################")   
+    message("useDrainage set to TRUE. Using WB_VegBasedDrainageMap to refine the spruce classes into well drained and poorly drained spruce...")
+    if (!suppliedElsewhere(sim$WB_VegBasedDrainageMap) && !is.null(sim$pixelGroupMap)){
+      message("##############################################################################")   
+      message("WB_VegBasedDrainageMap not supplied.")
+      message("Please couple with the WB_VegBasedDrainage module. Generating random ",
+              "drainage map aligned on pixelGroupMap with well drained and poorly drained values...",
+              "If you don't this, set the useDrainage parameter to FALSE.")
+      
+      groups <- unique(values(sim$pixelGroupMap))
+      ext = terra::ext(sim$pixelGroupMap)
+      sim$WB_VegBasedDrainageMap <- getRandomCategoricalMap(
+        origin = c(ext$xmin, ext$ymin),
+        ncol = ncol(sim$pixelGroupMap),
+        nrow = nrow(sim$pixelGroupMap),
+        crs = crs(sim$pixelGroupMap),
+        nbregion = length(groups),
+        valuevect = 1:2
+      )
+      sim$WB_VegBasedDrainageMap <- mask(sim$WB_VegBasedDrainageMap, sim$pixelGroupMap)
+    }
+  }
+  else {
+    message("useDrainage set to FALSE. Not using any drainage map to refine WB_HartJohnstoneForestClasses...")
+  }
+  return(invisible(sim))
+}
+
+reComputeHJForestClassesMap <- function(sim) {
+  drainageMap <- NULL
+  if (P(sim)$useDrainage && !is.null(sim$WB_VegBasedDrainageMap)){
+    drainageMap <- sim$WB_VegBasedDrainageMap
+  }
+  
+  sim$WB_HartJohnstoneForestClassesMap <- classifyStand(
+    cohortData = sim$cohortData, 
+    pixelGroupMap = sim$pixelGroupMap,
+    jackPineSp = P(sim)$jackPineSp,
+    larchSp = P(sim)$larchSp,
+    spruceSp = P(sim)$spruceSp,
+    drainageMap = drainageMap,
+    time(sim)
+  )
+  return(invisible(sim))
+}
+
 .inputObjects <- function(sim) {
   userTags <- c(currentModule(sim), "function:.inputObjects") 
   
   if(!suppliedElsewhere("pixelGroupMap", sim)){
+    browser()
     nbGroup <- 200
     pixelGroupRastWidth <- 1000
-    message("##############################################################################")   
-    message("pixelGrouMap not supplied.")   
-    message("Please provide one. Creating random map ", pixelGroupRastWidth, " pixels by ", 
+    message("##############################################################################")
+    message("pixelGrouMap not supplied.")
+    message("Please provide one. Creating random map ", pixelGroupRastWidth, " pixels by ",
             pixelGroupRastWidth, " pixels with ", nbGroup, " groups...")
 
     sim$pixelGroupMap <- Cache(
@@ -169,11 +179,11 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
       crs = "ESRI:102002",
       nbregion = nbGroup,
       seed = 100,
-      userTags = c(userTags, "pixelGroupMap"), 
+      userTags = c(userTags, "WB_pixelGroupMap"),
       omitArgs = c("userTags")
     )
   }
-  
+
   return(invisible(sim))
 }
 
