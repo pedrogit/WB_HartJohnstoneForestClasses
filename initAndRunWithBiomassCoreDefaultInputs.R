@@ -36,6 +36,14 @@ SpaDES.project::getModule(modulePath = getPaths()$modulePath,
                           overwrite = FALSE)
 
 SpaDES.project::getModule(modulePath = getPaths()$modulePath,
+                          c("pedrogit/WB_VegBasedDrainage@main"),
+                          overwrite = FALSE)
+
+SpaDES.project::getModule(modulePath = getPaths()$modulePath,
+                          c("pedrogit/WB_NonForestedVegClasses@main"),
+                          overwrite = FALSE)
+
+SpaDES.project::getModule(modulePath = getPaths()$modulePath,
                           c("pedrogit/WB_LichenBiomass@main"),
                           overwrite = FALSE)
 
@@ -83,6 +91,10 @@ sim <- SpaDES.core::simInit(
     WB_VegBasedDrainage = list(
       WB_VegBasedDrainageTimeStep = modelTimeStep,
       searchDistInPixelNb = 2
+    ),
+    
+    WB_NonForestedVegClasses = list(
+      WB_NonForestedVegClassesTimeStep = modelTimeStep
     ),
     
     WB_LichenBiomass = list(
