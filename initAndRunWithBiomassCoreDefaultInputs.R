@@ -54,10 +54,10 @@ options = options(
   # , reproducible.interactiveOnDownloadFail = FALSE
 )
 modelTimeStep <- 10
-options(spades.DTthreads = 20)
 
-# options('reproducible.interactiveOnDownloadFail' = FALSE)
-sim <- SpaDES.core::simInit(
+
+# sim <- SpaDES.core::simInit(
+sim <- SpaDES.core::simInitAndSpades(
   times = list(start = 0, end = 20),
   # modules = list("Biomass_core", "WB_HartJohnstoneForestClasses", "WB_VegBasedDrainage"),
   # modules = list("Biomass_core", "WB_HartJohnstoneForestClasses"),
@@ -66,14 +66,18 @@ sim <- SpaDES.core::simInit(
   modules = list(
     "Biomass_speciesData"
   , "Biomass_borealDataPrep"
-  , "Biomass_speciesParameters"
+  # , "Biomass_speciesParameters"
   , "Biomass_core"
   , "WB_HartJohnstoneForestClasses"
   , "WB_VegBasedDrainage"
+  , "WB_NonForestedVegClasses"
   , "WB_LichenBiomass"
   ),
   params = list(
-    .globals = list(sppEquivCol = 'LandR'),
+    .globals = list(
+       sppEquivCol = 'LandR'
+       , .useCache = c(".inputObjects", "init")
+    ),
     # Biomass_borealDataPrep = list(overrideAgeInFires = FALSE
     # ),
     Biomass_speciesParameters = list(maxBInFactorial = 500,
@@ -83,12 +87,14 @@ sim <- SpaDES.core::simInit(
     Biomass_speciesData = list(
       .plots = NA
     ),
+    
     Biomass_core = list(successionTimestep = modelTimeStep,
                         sppEquivCol = "LandR",
                         seedingAlgorithm = "noSeeding",
                         .plots = NA,
-                        calcSummaryBGM = NULL,
-                        .useCache = FALSE
+                        calcSummaryBGM = NULL
+                        ,.useCache = FALSE
+                        # ,.useCache = c(".inputObjects", "init")
     ),
     
     WB_HartJohnstoneForestClasses = list(
@@ -116,12 +122,17 @@ sim <- SpaDES.core::simInit(
       # create and use a random study area
       # Lambert Conformal Conic for Canada: this is used in NRCan's "KNN" products
       Biomass_corecrs <- "+proj=lcc +lat_1=49 +lat_2=77 +lat_0=0 +lon_0=-95 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0"
+      
       centre <- terra::vect(cbind(-104.757, 55.68663), crs = "epsg:4326") # Lat Long
+      # centre <- terra::vect(cbind(-123, 63), crs = "epsg:4326")
+      
       centre <- terra::project(centre, Biomass_corecrs)
+      
       studyArea <- LandR::randomStudyArea(centre, size = 2e8, seed = 1234)
+      # studyArea <- LandR::randomStudyArea(centre, size = 2e9, seed = 1235)
     },
     studyAreaLarge = terra::buffer(studyArea, width = 3e4)
   )
 )
 
-sim <- spades(sim)
+# sim <- spades(sim)
