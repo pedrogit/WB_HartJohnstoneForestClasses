@@ -41,8 +41,9 @@ classifyStand <- function(
     larchSp = c("Lari"), 
     spruceSp = c("Pice"), 
     drainageMap = NULL, 
-    time = 0
+    classificationTablePath = NULL
 ) {
+  
   saveClassSummaryTable <- TRUE
   labels = c("deci", "mixed", "conimix", "jackpine", "larch", "spruce")
   levels = c(1L, 2L, 3L, 4L, 5L, 6L)
@@ -92,9 +93,13 @@ classifyStand <- function(
 
   # Save a summary row for each pixelGroup (to visually validate the classification)
   # This does not include the spruce class drainage refinement which is a raster based process
-  if (saveClassSummaryTable && exists("getPaths", mode = "function")) {
-    fname <- file.path(getPaths()$outputPath, paste0("WB_HartJohnstoneForestClasses_", sprintf("%03d", time), ".csv"))
-    message("Save classification summary table to \"", fname, "\"...")
+  # if (saveClassSummaryTable && exists("sim") && exists("getPaths", mode = "function")) {
+  if (!is.null(classificationTablePath)) {
+    if (!dir.exists(dirname(classificationTablePath))) {
+      dir.create(dirname(classificationTablePath), recursive = TRUE)
+    }
+    # fname <- file.path(getPaths()$outputPath, paste0("WB_HartJohnstoneForestClasses_", sprintf("%03d", time), ".csv"))
+    message("Saving classification summary table to \"", classificationTablePath, "\"...")
     # Add the class as text
     outCDWithForestClass <- cdWithForestClass[, .(
                  pixelGroup = pixelGroup,

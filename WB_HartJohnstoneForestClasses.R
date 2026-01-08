@@ -154,7 +154,7 @@ reComputeHJForestClassesMap <- function(sim) {
     larchSp = P(sim)$larchSp,
     spruceSp = P(sim)$spruceSp,
     drainageMap = drainageMap,
-    time(sim)
+    classificationTablePath = file.path(getPaths()$outputPath, paste0("WB_HartJohnstoneForestClasses_", sprintf("%03d", time(sim)), ".csv"))
   )
   return(invisible(sim))
 }
