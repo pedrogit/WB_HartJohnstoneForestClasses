@@ -141,7 +141,7 @@ classifyStand <- function(
   # rasterizeReduced might produce a RasterLayer object if pixelGroupMap is a RasterLayer
   if ("SpatRaster" %in% class(WB_HartJohnstoneForestClassesMap)) {
     levels(WB_HartJohnstoneForestClassesMap) <- data.frame(ID = levels, class = labels)
-    coltab(WB_HartJohnstoneForestClassesMap) <- cbind(ID = levels, col = colors)
+    terra::coltab(WB_HartJohnstoneForestClassesMap) <- cbind(ID = levels, col = colors)
   }
   else {
     message("Could not write levels and color palette to WB_HartJohnstoneForestClassesMap because it is derived from pixelGroupMap which is not a SpatRaster raster...")
