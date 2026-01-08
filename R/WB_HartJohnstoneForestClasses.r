@@ -67,7 +67,7 @@ classifyStand <- function(
   
   # Aggregate the biomass for each pixelGroup 
   data.table::setkeyv(cd, cols = "pixelGroup") # Sort and set the key for faster processing
-  cdWithPcts <- cd[
+  cdWithForestClass <- cd[
     , .(
       totB      = sum(B),
       jackPineTotB = sum(B[speciesNb == 1]), # jackpine
@@ -81,7 +81,7 @@ classifyStand <- function(
   # Determine the stand class based on relative biomass
   dominancePct <- 2/3 # Set a dominance threshold
 
-  cdWithPcts[, WB_HartJohnstoneForestClasses := fcase(
+  cdWithForestClass[, WB_HartJohnstoneForestClasses := fcase(
     (jackPineTotB / totB) >= dominancePct,                                 match("jackpine", labels),
     (larchTotB / totB)    >= 0.75,                                         match("larch", labels),
     (spruceTotB / totB)   >= dominancePct,                                 match("spruce", labels),
@@ -96,7 +96,7 @@ classifyStand <- function(
     fname <- file.path(getPaths()$outputPath, paste0("WB_HartJohnstoneForestClasses_", sprintf("%03d", time), ".csv"))
     message("Save classification summary table to \"", fname, "\"...")
     # Add the class as text
-    outDdWithPcts <- cdWithPcts[, .(
+    outCDWithForestClass <- cdWithForestClass[, .(
                  pixelGroup = pixelGroup,
                  B = totB,
                  jackPinePct = as.integer(jackPineTotB / totB * 100),
@@ -105,13 +105,14 @@ classifyStand <- function(
                  classInt = WB_HartJohnstoneForestClasses,
                  classText = factor(WB_HartJohnstoneForestClasses, levels = levels, labels = labels)
                 )]
-    write.csv(outDdWithPcts, fname, quote = FALSE)
+    write.csv(outCDWithForestClass, classificationTablePath, quote = FALSE)
   }
   
   # Rasterize
   # Create a reduced list of types per pixelGroups to be rasterized
   message("Creating WB_HartJohnstoneForestClasses raster...")
   WB_HartJohnstoneForestClassesMap <- SpaDES.tools::rasterizeReduced(reduced = cdWithPcts,
+  WB_HartJohnstoneForestClassesMap <- SpaDES.tools::rasterizeReduced(reduced = cdWithForestClass,
                                                    fullRaster = pixelGroupMap,
                                                    mapcode = "pixelGroup", 
                                                    newRasterCols ="WB_HartJohnstoneForestClasses")
