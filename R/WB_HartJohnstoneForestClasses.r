@@ -18,6 +18,7 @@ getCohortSpeciesFactors <- function(cohortData, speciesMatch){
   matchingSpCodes <- grep(
     pattern = paste0("^(", paste(speciesMatch, collapse = "|"), ")"),
     x = levels(uniqueSpCodes),
+    ignore.case = TRUE,
     value = TRUE
   )
   
