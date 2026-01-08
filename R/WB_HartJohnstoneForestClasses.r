@@ -116,7 +116,6 @@ classifyStand <- function(
   # Rasterize
   # Create a reduced list of types per pixelGroups to be rasterized
   message("Creating WB_HartJohnstoneForestClasses raster...")
-  WB_HartJohnstoneForestClassesMap <- SpaDES.tools::rasterizeReduced(reduced = cdWithPcts,
   WB_HartJohnstoneForestClassesMap <- SpaDES.tools::rasterizeReduced(reduced = cdWithForestClass,
                                                    fullRaster = pixelGroupMap,
                                                    mapcode = "pixelGroup", 
@@ -149,7 +148,7 @@ classifyStand <- function(
   
   names(WB_HartJohnstoneForestClassesMap) <- "standtype"
   varnames(WB_HartJohnstoneForestClassesMap) <- "standtype"
-    
+
   return(WB_HartJohnstoneForestClassesMap)
 }
 
