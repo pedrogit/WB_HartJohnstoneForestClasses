@@ -37,7 +37,7 @@ cohortData values for each pixelGroupMap.
 Biomass_core pixelGroupMap pixels set to NA or 0 (disturbed) are also set to NA 
 by WB_HartJohnstoneForestClass.
 
-#### Authors:
+### Authors
 
 Pierre Racine <pierre.racine@sbf.ulaval.ca> [aut, cre]
 
@@ -50,16 +50,23 @@ Pierre Racine <pierre.racine@sbf.ulaval.ca> [aut, cre]
 | larchSp | character | \"Lari\" | Vector of larch species names e.g. c(\"Lari_lar\", \"Lari_occ\"). Can also be the whole genus: \"Lari\" |
 | spruceSp | larchSp | character | \"Pice\" | Vector of larch species names e.g. c(\"Lari_lar\", \"Lari_occ\"). Can also be the whole genus: \"Pice\" |
 Vector of spruce species names e.g. c(\"Pice_gla\", \"Pice_mar\"). Can also be the whole genus: \"Pice\" |
-| useDrainage | boolean | TRUE | Indicating if the drainage produced by the WB_VegBasedDrainage module should be taken into account. If the WB_VegBasedDrainage module is not present, this parameter is ignored. |
+| useDrainage | boolean | TRUE | Indicating if the drainage produced by the WB_VegBasedDrainage module should be taken into account to refine the spruce class into poorly-drained spruce (pd_spruce) and well-drained sprice (wd_spruce). If the WB_VegBasedDrainage module is not present, this parameter is ignored. |
 
 ### Expected Module Inputs
 
-| Input | Description |
-| --- | --- |
+| Input Object | Class | Description |
+| cohortData | data.table | Community table created from available biomass (g/m2), age and species cover data, as well as ecozonation information or equivalent. Columns: B, pixelGroup, speciesCode. |
+| pixelGroupMap | SpatRaster | Community map having mapcodes matching the cohortData community table or equivalent. |
+| WB_VegBasedDrainageMap | SpatRaster | Drainage map produced by the WB_VegBasedDrainageMap module or equivalent. |
 
 ### Module Outputs
 
+| Output Object | Class | Description |
+| WB_HartJohnstoneForestClassesMap | SpatRaster | Raster map classified into pre-defined 6 or 7 vegetation classes. |
+
 ### Code
+
+The code is available here: https://github.com/pedrogit/WB_HartJohnstoneForestClasses
 
 ### Minimal Self Contained Example
 

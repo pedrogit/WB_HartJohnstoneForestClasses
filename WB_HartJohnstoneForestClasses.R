@@ -54,7 +54,7 @@ defineModule(sim, list(
 
   outputObjects = bindrows(
     createsOutput("WB_HartJohnstoneForestClassesMap", "RasterLayer",
-                  desc = paste("classification of cohort data into pre-defined",
+                  desc = paste("Raster map classified into pre-defined",
                                "vegetation classes")),
   )
 ))
