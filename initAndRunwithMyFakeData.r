@@ -144,7 +144,7 @@ options(spades.DTthreads = 20)
 # Run the WB_HartJohnstoneForestClasses module by itself
 # sim <- simInit(times = list(start = 0, end = 0),
 #                  modules = list("WB_HartJohnstoneForestClasses"),
-#                  params = list(WB_HartJohnstoneForestClasses = list(WB_HartJohnstoneForestClassesTimeStep = 1,
+#                  params = list(WB_HartJohnstoneForestClasses = list(WB_HJForestClassesTimeStep = 1,
 #                                                  .saveInitialTime = 0,
 #                                                  .saveInterval = modelTimeStep,
 #                                                  useDrainage = TRUE)),
@@ -171,7 +171,7 @@ sim <- simInit(
     ),
     
     WB_HartJohnstoneForestClasses = list(
-      WB_HartJohnstoneForestClassesTimeStep = modelTimeStep,
+      WB_HJForestClassesTimeStep = modelTimeStep,
       .saveInitialTime = 0,
       .saveInterval = modelTimeStep,
       useDrainage = TRUE

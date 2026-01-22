@@ -21,7 +21,7 @@ defineModule(sim, list(
                     "Describes the simulation time at which the first plot event should occur."),
     defineParameter(".plotInterval", "numeric", NA, NA, NA,
                     "Describes the simulation time interval between plot events."),
-    defineParameter("WB_HartJohnstoneForestClassesTimeStep", "numeric", 1, NA, NA,
+    defineParameter("WB_HJForestClassesTimeStep", "numeric", 1, NA, NA,
                      "Describes the simulation time at which the reclassify event should occur."),
     defineParameter(".saveInitialTime", "numeric", NA, NA, NA,
                     "Describes the simulation time at which the first save event should occur."),
@@ -77,7 +77,7 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
     reComputeHJForestClassesMap = {
       # browser()
       sim <- reComputeHJForestClassesMap(sim)
-      sim <- scheduleEvent(sim, time(sim) + P(sim)$WB_HartJohnstoneForestClassesTimeStep, "WB_HartJohnstoneForestClasses", "reComputeHJForestClassesMap", 1)
+      sim <- scheduleEvent(sim, time(sim) + P(sim)$WB_HJForestClassesTimeStepohnstoneForestClasses", "reComputeHJForestClassesMap", 1)
     },
 
     plot = {

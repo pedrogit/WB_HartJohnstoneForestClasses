@@ -98,7 +98,7 @@ sim <- SpaDES.core::simInitAndSpades(
     ),
     
     WB_HartJohnstoneForestClasses = list(
-      WB_HartJohnstoneForestClassesTimeStep = modelTimeStep,
+      WB_HJForestClassesTimeStep = modelTimeStep,
       .saveInitialTime = 0,
       .saveInterval = modelTimeStep,
       useDrainage = TRUE
