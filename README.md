@@ -55,6 +55,7 @@ Vector of spruce species names e.g. c(\"Pice_gla\", \"Pice_mar\"). Can also be t
 ### Expected Module Inputs
 
 | Input Object | Class | Description |
+| --- | --- | --- |
 | cohortData | data.table | Community table created from available biomass (g/m2), age and species cover data, as well as ecozonation information or equivalent. Columns: B, pixelGroup, speciesCode. |
 | pixelGroupMap | SpatRaster | Community map having mapcodes matching the cohortData community table or equivalent. |
 | WB_VegBasedDrainageMap | SpatRaster | Drainage map produced by the WB_VegBasedDrainageMap module or equivalent. |
@@ -62,6 +63,7 @@ Vector of spruce species names e.g. c(\"Pice_gla\", \"Pice_mar\"). Can also be t
 ### Module Outputs
 
 | Output Object | Class | Description |
+| --- | --- | --- |
 | WB_HartJohnstoneForestClassesMap | SpatRaster | Raster map classified into pre-defined 6 or 7 vegetation classes. |
 
 ### Code
