@@ -43,15 +43,19 @@ Pierre Racine <pierre.racine@sbf.ulaval.ca> [aut, cre]
 
 ### Module Parameters
 
-| Parameter | Description |
-| --- | --- |
-| WB_HartJohnstoneForestClassesTimeStep | simulation time at which the reclassify event should occur. |
-| jackPineSp | Vector of jackpine species names e.g. c(\"Pinu_ban\", \"Pinu_con\"). Can also be the whole genus: \"Pinu\" |
-| larchSp | Vector of larch species names e.g. c(\"Lari_lar\", \"Lari_occ\"). Can also be the whole genus: \"Lari\" |
-| spruceSp | Vector of spruce species names e.g. c(\"Pice_gla\", \"Pice_mar\"). Can also be the whole genus: \"Pice\" |
-| useDrainage | boolean indicating if the drainage produced by the WB_VegBasedDrainage module should be taken into account. If the WB_VegBasedDrainage module is not present, this parameter is ignored. |
+| Parameter | Class | Default | Description |
+| --- | --- | --- | --- |
+| WB_HartJohnstoneForestClassesTimeStep | integer | 1 | Simulation time at which the reclassify event should occur. |
+| jackPineSp | character | \"Pinu\" | Vector of jackpine species names e.g. c(\"Pinu_ban\", \"Pinu_con\"). Can also be the whole genus: \"Pinu\" |
+| larchSp | character | \"Lari\" | Vector of larch species names e.g. c(\"Lari_lar\", \"Lari_occ\"). Can also be the whole genus: \"Lari\" |
+| spruceSp || larchSp | character | \"Pice\" | Vector of larch species names e.g. c(\"Lari_lar\", \"Lari_occ\"). Can also be the whole genus: \"Pice\" |
+Vector of spruce species names e.g. c(\"Pice_gla\", \"Pice_mar\"). Can also be the whole genus: \"Pice\" |
+| useDrainage | boolean | TRUE | Indicating if the drainage produced by the WB_VegBasedDrainage module should be taken into account. If the WB_VegBasedDrainage module is not present, this parameter is ignored. |
 
 ### Expected Module Inputs
+
+| Input | Description |
+| --- | --- |
 
 ### Module Outputs
 
