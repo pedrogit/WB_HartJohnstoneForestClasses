@@ -2,8 +2,8 @@
 
 WB_HartJohnstoneForestClass is a SpaDES module associated with the LandR set of 
 modules for forest biomass and succession simulation. At each simulation step, 
-WB_HartJohnstoneForestClass reclassify the pixels produced by Biomass_core to 6 
-(or 7) classes based on the classification rules found in [Hart, Henkelman et al. (2019)](https://onlinelibrary.wiley.com/doi/abs/10.1111/gcb.14550). 
+WB_HartJohnstoneForestClass classifies cohort data produced by Biomass_core into 6 
+(or 7) classes of pixels based on the classification rules found in [Hart, Henkelman et al. (2019)](https://onlinelibrary.wiley.com/doi/abs/10.1111/gcb.14550). 
 
  - non-forested (NA)
  - deciduous (1)
@@ -20,12 +20,17 @@ the WB_VegBasedDrainage module:
  - well-drained spruce (6)
  - poorly-drained spruce (7).
 
-WB_VegBasedDrainage is also based on WB_HartJohnstoneForestClass making an 
-optional cyclic dependency between the tow modules. Normally a first run of 
-WB_HartJohnstoneForestClass during module initialization will classify the 
-forest to classes 1-6, without taking drainage into account. A 
-WB_VegBasedDrainage maps will then be compute and used at the next simulation 
-step to produce a refined classification to classes 1-7.
+WB_VegBasedDrainage (note the "veg" in it's name) is also based on 
+WB_HartJohnstoneForestClass making an optional cyclic dependency between the two 
+modules. Normally a first run of WB_HartJohnstoneForestClass during module 
+initialization will classify the forest to classes 1-6, without taking drainage 
+into account. A WB_VegBasedDrainage maps will then be computed and used, at the 
+next simulation step, by the WB_HartJohnstoneForestClass module refined 
+classification of spruce from classes 1-6 to classes 1-7.
+
+As it's name suggest, WB_HartJohnstoneForestClass was developed to work with 
+data from the Western boreal canadian area where jackpine, larch and spruce are 
+particularly abondant.
 
 WB_HartJohnstoneForestClass is dynamic in that pixelGroupMap and cohort data are 
 also dynamic: relative biomass changes with time and influence the classification.
