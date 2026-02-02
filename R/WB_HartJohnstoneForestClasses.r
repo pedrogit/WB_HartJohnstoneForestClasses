@@ -131,10 +131,11 @@ classifyStand <- function(
     colors <- c(colors, "#1b4f72")
     
     # 1 = poorly drained, 2 = well drained
-    WB_HartJohnstoneForestClassesMap <- 
-      ifel(WB_HartJohnstoneForestClassesMap == match("wd_spruce", labels), 
-      ifel(drainageMap == 2, match("wd_spruce", labels), match("pd_spruce", labels)),
-      WB_HartJohnstoneForestClassesMap)
+    # WB_HartJohnstoneForestClassesMapOld <-
+    #   ifel(WB_HartJohnstoneForestClassesMap == match("wd_spruce", labels),
+    #   ifel(drainageMap == 2, match("wd_spruce", labels), match("pd_spruce", labels)),
+    #   WB_HartJohnstoneForestClassesMap)
+    WB_HartJohnstoneForestClassesMap[WB_HartJohnstoneForestClassesMap == match("wd_spruce", labels) & drainageMap == 2] <- 7L
   }
   
   # rasterizeReduced might produce a RasterLayer object if pixelGroupMap is a RasterLayer
