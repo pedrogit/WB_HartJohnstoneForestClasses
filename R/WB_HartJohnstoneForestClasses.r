@@ -67,7 +67,7 @@ classifyStand <- function(
   )]
   
   # Aggregate the biomass for each pixelGroup 
-  data.table::setkeyv(cd, cols = "pixelGroup") # Sort and set the key for faster processing
+  #data.table::setkeyv(cd, cols = "pixelGroup") # Sort and set the key for faster processing
   cdWithForestClass <- cd[
     , .(
       totB      = sum(B),
