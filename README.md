@@ -107,7 +107,6 @@ Racine, P., Cumming, S.G. (2026) *WB_HartJohnstoneForestClasses: A SpaDES module
 | --- | --- | --- |
 | WB_HartJohnstoneForestClassesMap | SpatRaster | Raster map classified into pre-defined 6 or 7 vegetation classes. |
 
-Pierre: suggest Class rather than Classes!
 
 ### Code
 
