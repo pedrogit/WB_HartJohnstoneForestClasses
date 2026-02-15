@@ -1,6 +1,6 @@
 # WB_HartJohnstoneForestClasses
 
-### Overview
+## Introduction
 
 WB_HartJohnstoneForestClasses is a [SpaDES](https://spades.predictiveecology.org/) 
 module complementing the [LandR](https://landr-manual.predictiveecology.org/) 
@@ -17,13 +17,14 @@ As their names suggest, those modules were developed using field data collected
 in the western boreal forest of Canada. They were developed to support lichen 
 biomass modelling for woodland caribou conservation.
 
-At each simulation step, WB_HartJohnstoneForestClasses classifies cohort data 
-produced by Biomass_core into 6 (or 7) classes of pixels based on the 
+## Overview
+At each simulation step, WB_HartJohnstoneForestClasses classifies LandR cohort data 
+produced by Biomass_core into 6 (or 7) forest classes. The classification is based on total species' biomasses, according to the plot basal-area
 classification rules found in [Hart, Henkelman et al. (2019)](https://onlinelibrary.wiley.com/doi/abs/10.1111/gcb.14550). 
 
 | Class Code | Description |
 |-----------|-------------|
-| NA | Non-forested |
+| NA | LandR non-forested pixels |
 | 1 | Deciduous |
 | 2 | Conifer–deciduous mix |
 | 3 | Conifer mix |
@@ -32,20 +33,21 @@ classification rules found in [Hart, Henkelman et al. (2019)](https://onlinelibr
 | 6 | Spruce |
 
 If the WB_VegBasedDrainage module is part of the model during the simulation, the 
-spruce class will be refined according to the quality of the drainage modeled by 
-the WB_VegBasedDrainage module:
+class of spruce pixels will be refined according to the binary drainage classed my module 
+WB_VegBasedDrainage, as follows:
 
 | Class Code | Description |
 |-----------|-------------|
-| ... | Other non-spruce classes |
+| 1-5 | Other non-spruce classes |
 | 6 | Well-drained spruce |
 | 7 | Poorly-drained spruce |
 
-Class 7 is only produced when useDrainage = TRUE and WB_VegBasedDrainage is 
-present.
+Class 7 is only produced when module paramater **useDrainage = TRUE** and module WB_VegBasedDrainage is 
+present. Otherwise Class 6 combines spruce pixels of all drainage classes.
 
 WB_VegBasedDrainage (note the "Veg" part in its name) is also based on 
-WB_HartJohnstoneForestClasses making an optional cyclic dependency between the two 
+WB_HartJohnstoneForestClasses, because the determination of drainag class is itself forest-class dependent. 
+This relationship leads to an optional cyclic dependency between the two 
 modules. Normally a first run of WB_HartJohnstoneForestClasses during module 
 initialization will classify the forest to classes 1-6, without taking drainage 
 into account. A WB_VegBasedDrainage map will then be computed and used, at the 
@@ -64,7 +66,8 @@ classification of spruce from classes 6 to classes 6 and 7.
    - Spruce pixels are refined into well- or poorly-drained classes (6 or 7)
 
 WB_HartJohnstoneForestClasses is dynamic in that pixelGroupMap and cohort data are 
-also dynamic: relative biomass changes with time and influence the classification.
+also dynamic: relative biomass changes with time and therefore influence the forest classification. 
+This in turn may affect the drainage classification, if module WB_VegBasedDrainage in included in the simulation. 
 
 The classification rules are described in details in the classifyStand() 
 function. They are based on the relative biomass quantities computed from the 
