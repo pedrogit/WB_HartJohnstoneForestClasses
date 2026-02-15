@@ -87,10 +87,10 @@ Racine, P., Cumming, S.G. (2026) *WB_HartJohnstoneForestClasses: A SpaDES module
 
 | Parameter | Class | Default | Description |
 | --- | --- | --- | --- |
-| WB_HJForestClassesTimeStep | integer | 1 | Simulation time at which the reclassify event should occur. |
-| jackPineSp | character | \"Pinu\" | Vector of jackpine case insensitive species names e.g. c(\"Pinu_ban\", \"Pinu_con\"). Can also be the whole genus: \"Pinu\" |
-| larchSp | character | \"Lari\" | Vector of larch case insensitive species names e.g. c(\"Lari_lar\", \"Lari_occ\"). Can also be the whole genus: \"Lari\" |
-| spruceSp | character | \"Pice\" | Vector of spruce case insensitive species names e.g. c(\"Pice_gla\", \"Pice_mar\"). Can also be the whole genus: \"Pice\" |
+| WB_HJForestClassesTimeStep | integer | 10 | Return interval for classification even, as per LandR.|
+| jackPineSp | character | \"Pinu\" | Jack pine species: Vector of case insensitive species codes e.g. c(\"Pinu_ban\", \"Pinu_con\"). Can also be the whole genus: \"Pinu\" |
+| larchSp | character | \"Lari\" | Larch species: Vector of case insensitive species codes e.g. c(\"Lari_lar\", \"Lari_occ\"). Can also be the whole genus: \"Lari\" |
+| spruceSp | character | \"Pice\" | Spruce species: Vector of case insensitive species codes e.g. c(\"Pice_gla\", \"Pice_mar\"). Can also be the whole genus: \"Pice\" |
 | useDrainage | boolean | TRUE | Indicating if the drainage produced by the WB_VegBasedDrainage module should be taken into account to refine the spruce class into poorly-drained spruce (pd_spruce) and well-drained spruce (wd_spruce). If the WB_VegBasedDrainage module is not present, this parameter is ignored. |
 
 ### Expected Module Inputs
@@ -106,6 +106,8 @@ Racine, P., Cumming, S.G. (2026) *WB_HartJohnstoneForestClasses: A SpaDES module
 | Output Object | Class | Description |
 | --- | --- | --- |
 | WB_HartJohnstoneForestClassesMap | SpatRaster | Raster map classified into pre-defined 6 or 7 vegetation classes. |
+
+Pierre: suggest Class rather than Classes!
 
 ### Code
 
