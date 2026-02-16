@@ -4,23 +4,21 @@
 
 WB_HartJohnstoneForestClasses is a [SpaDES](https://spades.predictiveecology.org/) 
 module complementing the [LandR](https://landr-manual.predictiveecology.org/) 
-ecosystem of modules for forest biomass and succession simulation. It is part of 
-a series of modules modelling boreal forests in Western Canada adding some layers of 
-information to the LandR ecosystem. Those modules are:
+ecosystem of modules for forest biomass and succession simulation. It is part of an ensemble of modules that provide to LandR the statistical prediction of terrestrial lichen biomass from stand type, time-since fire, and terrestrial ecoprovince.
+
+The modules are an implementatiom of [Greuel and Degré-Timmons et al (2021)](https://esajournals-onlinelibrary-wiley-com.acces.bibl.ulaval.ca/doi/full/10.1002/ecs2.3481), developed to support lichen biomass modelling for woodland caribou conservation in the Northwest Territories. The geographical area wherein the model may reasonably be applied should be assessed from Figure 2 of the cited paper. 
+
+The components of the module ensemble are:
 
 - [WB_HartJohnstoneForestClasses](https://github.com/pedrogit/WB_HartJohnstoneForestClasses) - This module. Generates a map classifying LandR forested pixels to 6 (or 7) classes.
-- [WB_VegBasedDrainage](https://github.com/pedrogit/WB_VegBasedDrainage) - Generates a map with two drainage classes.
-- [WB_NonForestedVegClasses](https://github.com/pedrogit/WB_NonForestedVegClasses) - Generates a map of land cover classes for areas not covered by LandR (non-forested).
-- [WB_LichenBiomass](https://github.com/pedrogit/WB_LichenBiomass) - Generates a map of lichen biomass for forested and non-forested areas.
+- [WB_VegBasedDrainage](https://github.com/pedrogit/WB_VegBasedDrainage) - Generates a map of two drainage classes.
+- [WB_NonForestedVegClasses](https://github.com/pedrogit/WB_NonForestedVegClasses) -Generates a map of land cover classes for areas LandR considers to be non-forested.
+- [WB_LichenBiomass](https://github.com/pedrogit/WB_LichenBiomass) - Generates a wall-to-wall map of predicted lichen biomass density for forested and non-forested pixels.
 
-As their names suggest, those modules were developed using field data collected 
-in the western boreal forest of Canada. They were developed to support lichen 
-biomass modelling for woodland caribou conservation.
+These modules are derived from extensive empirical research in the northwest boreal of North America, as described in [Greuel and Degré-Timmons et al (2021)](https://esajournals-onlinelibrary-wiley-com.acces.bibl.ulaval.ca/doi/full/10.1002/ecs2.3481), Casheiro-Guilhem et. al (in prep.) and foundational papers by [Hart and Johnstone et al. (2018)](https://onlinelibrary.wiley.com/doi/abs/10.1111/gcb.14550).
 
-## Overview
-At each simulation step, WB_HartJohnstoneForestClasses classifies LandR cohort data 
-produced by Biomass_core into 6 (or 7) forest classes. The classification is based on total species' biomasses, according to the plot basal-area
-classification rules found in [Hart, Henkelman et al. (2019)](https://onlinelibrary.wiley.com/doi/abs/10.1111/gcb.14550). 
+## WB_HartJohnstoneForestClasses Module Overview
+At each simulation step, WB_HartJohnstoneForestClasses classifies LandR cohort data produced by Biomass_core into 6 (or 7) forest classes. The classification is based on total species' biomasses, according to the plot basal-area classification rules found in [Hart, Henkelman et al. (2019)](https://onlinelibrary.wiley.com/doi/abs/10.1111/gcb.14550). 
 
 | Class Code | Description |
 |-----------|-------------|
@@ -32,9 +30,7 @@ classification rules found in [Hart, Henkelman et al. (2019)](https://onlinelibr
 | 5 | Larch |
 | 6 | Spruce |
 
-If the WB_VegBasedDrainage module is part of the model during the simulation, the 
-class of spruce pixels will be refined according to the binary drainage classed my module 
-WB_VegBasedDrainage, as follows:
+If the WB_VegBasedDrainage module is part of the model during the simulation, the class of spruce pixels will be refined according to the binary drainage classed my module WB_VegBasedDrainage, as follows:
 
 | Class Code | Description |
 |-----------|-------------|
@@ -42,17 +38,9 @@ WB_VegBasedDrainage, as follows:
 | 6 | Well-drained spruce |
 | 7 | Poorly-drained spruce |
 
-Class 7 is only produced when module paramater **useDrainage = TRUE** and module WB_VegBasedDrainage is 
-present. Otherwise Class 6 combines spruce pixels of all drainage classes.
+Class 7 is only produced when module paramater **useDrainage = TRUE** and module WB_VegBasedDrainage is present. Otherwise Class 6 combines spruce pixels of all drainage classes.
 
-WB_VegBasedDrainage (note the "Veg" part in its name) is also based on 
-WB_HartJohnstoneForestClasses, because the determination of drainag class is itself forest-class dependent. 
-This relationship leads to an optional cyclic dependency between the two 
-modules. Normally a first run of WB_HartJohnstoneForestClasses during module 
-initialization will classify the forest to classes 1-6, without taking drainage 
-into account. A WB_VegBasedDrainage map will then be computed and used, at the 
-next simulation step, by the WB_HartJohnstoneForestClasses module to refine the
-classification of spruce from classes 6 to classes 6 and 7.
+WB_VegBasedDrainage (note the "Veg" part in its name) is also based on WB_HartJohnstoneForestClasses, because the determination of drainag class is itself forest-class dependent. This relationship leads to an optional cyclic dependency between the two modules. Normally a first run of WB_HartJohnstoneForestClasses during module initialization will classify the forest to classes 1-6, without taking drainage into account. A WB_VegBasedDrainage map will then be computed and used, at the next simulation step, by the WB_HartJohnstoneForestClasses module to refine the classification of spruce from classes 6 to classes 6 and 7.
 
 1. Initialization:
    - WB_HartJohnstoneForestClasses runs without drainage
@@ -106,7 +94,6 @@ Racine, P., Cumming, S.G. (2026) *WB_HartJohnstoneForestClasses: A SpaDES module
 | Output Object | Class | Description |
 | --- | --- | --- |
 | WB_HartJohnstoneForestClassesMap | SpatRaster | Raster map classified into pre-defined 6 or 7 vegetation classes. |
-
 
 ### Code
 
