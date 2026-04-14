@@ -76,7 +76,7 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
     reComputeHJForestClassesMap = {
       # browser()
       sim <- reComputeHJForestClassesMap(sim)
-      sim <- scheduleEvent(sim, time(sim) + P(sim)$WB_HJForestClassesTimeStep, "reComputeHJForestClassesMap", 1)
+      sim <- scheduleEvent(sim, time(sim) + P(sim)$WB_HJForestClassesTimeStep, "WB_HartJohnstoneForestClasses", "reComputeHJForestClassesMap", 1)
     },
 
     plot = {
