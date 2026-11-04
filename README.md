@@ -10,6 +10,23 @@ saves at 9. Missing plot/save intervals use the resolved classification interval
 initial plot/save times still control whether those outputs are enabled.
 This supersedes historical timing descriptions below; scientific rules are unchanged.
 
+## Additional conifers
+
+`otherConiferSp` adds conifers beyond the existing `jackPineSp`, `larchSp` and
+`spruceSp` groups. Its default is
+`c("Abie_", "Calc_", "Cham_", "Juni_", "Pinu_", "Pseu_", "Sequ_", "Taxu_", "Thuj_", "Tsug_")`.
+Entries are case-insensitive literal species-code prefixes. `character(0)`
+restores the previous three-group conifer definition.
+
+Cohorts are assigned to jack pine, larch, spruce, then other conifers, in that
+order. Overlapping prefixes never double-count biomass. The conifer-mix rule
+uses the combined biomass of all four groups (at least two thirds of total),
+after the unchanged jack-pine, larch and spruce dominance rules. Pure fir and
+lodgepole pine therefore default to conifer mix, not spruce or jack pine.
+The deciduous rule still uses residual biomass outside all four conifer groups
+(strictly more than two thirds); it does not explicitly identify deciduous taxa.
+Classification CSVs include `otherConiferPct` and `coniferPct`.
+
 ## Introduction
 
 WB_HartJohnstoneForestClasses is a [SpaDES](https://spades.predictiveecology.org/) 
@@ -89,6 +106,7 @@ Racine, P., Cumming, S.G. (2026) *WB_HartJohnstoneForestClasses: A SpaDES module
 | jackPineSp | character | \"Pinu\" | Jack pine species: Vector of case insensitive species codes e.g. c(\"Pinu_ban\", \"Pinu_con\"). Can also be the whole genus: \"Pinu\" |
 | larchSp | character | \"Lari\" | Larch species: Vector of case insensitive species codes e.g. c(\"Lari_lar\", \"Lari_occ\"). Can also be the whole genus: \"Lari\" |
 | spruceSp | character | \"Pice\" | Spruce species: Vector of case insensitive species codes e.g. c(\"Pice_gla\", \"Pice_mar\"). Can also be the whole genus: \"Pice\" |
+| otherConiferSp | character | See Additional conifers above | Additional conifer prefixes, applied only after jack pine, larch and spruce. Empty vector disables this group. |
 | useDrainage | boolean | TRUE | Indicating if the drainage produced by the WB_VegBasedDrainage module should be taken into account to refine the spruce class into poorly-drained spruce (pd_spruce) and well-drained spruce (wd_spruce). If the WB_VegBasedDrainage module is not present, this parameter is ignored. |
 
 ### Expected Module Inputs

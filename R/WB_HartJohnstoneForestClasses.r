@@ -41,8 +41,18 @@ classifyStand <- function(
     larchSp = c("Lari"), 
     spruceSp = c("Pice"), 
     drainageMap = NULL, 
-    classificationTablePath = NULL
+    classificationTablePath = NULL,
+    otherConiferSp = c("Abie_", "Calc_", "Cham_", "Juni_", "Pinu_", "Pseu_", "Sequ_", "Taxu_", "Thuj_", "Tsug_")
 ) {
+  if (!is.character(otherConiferSp) || anyNA(otherConiferSp) ||
+      any(!nzchar(trimws(otherConiferSp)) | trimws(otherConiferSp) != otherConiferSp)) {
+    stop("`otherConiferSp` must be a character vector of nonblank prefixes without surrounding whitespace.")
+  }
+  otherConiferCodes <- rep(FALSE, nrow(cohortData))
+  for (prefix in unique(tolower(otherConiferSp))) {
+    otherConiferCodes <- otherConiferCodes |
+      startsWith(tolower(as.character(cohortData$speciesCode)), prefix)
+  }
   
   saveClassSummaryTable <- TRUE
   labels = c("deci", "mixed", "conimix", "jackpine", "larch", "spruce")
@@ -63,7 +73,8 @@ classifyStand <- function(
     speciesCode %in% jackPineFact, 1, # jackpine
     speciesCode %in% larchFact,    2, # larch
     speciesCode %in% spruceFact,   3, # spruce
-    default =                      4  # other
+    otherConiferCodes,            4, # residual conifers only
+    default =                    5  # other
   )]
   
   # Aggregate the biomass for each pixelGroup 
@@ -73,11 +84,12 @@ classifyStand <- function(
       totB      = sum(B),
       jackPineTotB = sum(B[speciesNb == 1]), # jackpine
       larchTotB    = sum(B[speciesNb == 2]), # larch
-      spruceTotB   = sum(B[speciesNb == 3])  # spruce
+      spruceTotB   = sum(B[speciesNb == 3]), # spruce
+      otherConiferTotB = sum(B[speciesNb == 4])
     ),
     by = pixelGroup
   ]
-  
+  cdWithForestClass[, coniferTotB := jackPineTotB + larchTotB + spruceTotB + otherConiferTotB]
   
   # Determine the stand class based on relative biomass
   dominancePct <- 2/3 # Set a dominance threshold
@@ -86,8 +98,8 @@ classifyStand <- function(
     (jackPineTotB / totB) >= dominancePct,                                 match("jackpine", labels),
     (larchTotB / totB)    >= 0.75,                                         match("larch", labels),
     (spruceTotB / totB)   >= dominancePct,                                 match("spruce", labels),
-    ((jackPineTotB + larchTotB + spruceTotB) / totB) >= dominancePct,      match("conimix", labels),
-    (1 - ((jackPineTotB + larchTotB + spruceTotB) / totB)) > dominancePct, match("deci", labels), 
+    (coniferTotB / totB) >= dominancePct,                                 match("conimix", labels),
+    (1 - coniferTotB / totB) > dominancePct,                               match("deci", labels),
     default =                                                              match("mixed", labels)
   )]
 
@@ -107,6 +119,8 @@ classifyStand <- function(
                  jackPinePct = as.integer(jackPineTotB / totB * 100),
                  larchPct  = as.integer(larchTotB / totB * 100),
                  sprucePct  = as.integer(spruceTotB / totB * 100),
+                 otherConiferPct = as.integer(otherConiferTotB / totB * 100),
+                 coniferPct = as.integer(coniferTotB / totB * 100),
                  classInt = WB_HartJohnstoneForestClasses,
                  classText = factor(WB_HartJohnstoneForestClasses, levels = levels, labels = labels)
                 )]
