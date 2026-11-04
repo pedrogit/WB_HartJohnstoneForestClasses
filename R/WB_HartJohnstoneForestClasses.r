@@ -48,6 +48,7 @@ classifyStand <- function(
       any(!nzchar(trimws(otherConiferSp)) | trimws(otherConiferSp) != otherConiferSp)) {
     stop("`otherConiferSp` must be a character vector of nonblank prefixes without surrounding whitespace.")
   }
+  # Literal prefixes avoid regex interpretation; an empty vector matches nothing.
   otherConiferCodes <- rep(FALSE, nrow(cohortData))
   for (prefix in unique(tolower(otherConiferSp))) {
     otherConiferCodes <- otherConiferCodes |
@@ -68,7 +69,8 @@ classifyStand <- function(
   # Copy the main data table so we do not modify the original one
   cd <- cohortData
 
-  # Convert the species codes into integer for faster comparison
+  # First match wins: named subtypes take precedence over other conifers.
+  # In particular, Pinu_ban also matches Pinu_ but its biomass is counted once.
   cd[, speciesNb := fcase(
     speciesCode %in% jackPineFact, 1, # jackpine
     speciesCode %in% larchFact,    2, # larch
@@ -89,11 +91,13 @@ classifyStand <- function(
     ),
     by = pixelGroup
   ]
+  # Mutually exclusive groups make this total safe even with overlapping prefixes.
   cdWithForestClass[, coniferTotB := jackPineTotB + larchTotB + spruceTotB + otherConiferTotB]
   
   # Determine the stand class based on relative biomass
   dominancePct <- 2/3 # Set a dominance threshold
 
+  # Keep subtype thresholds first; deciduous remains the non-conifer residual.
   cdWithForestClass[, WB_HartJohnstoneForestClasses := fcase(
     (jackPineTotB / totB) >= dominancePct,                                 match("jackpine", labels),
     (larchTotB / totB)    >= 0.75,                                         match("larch", labels),

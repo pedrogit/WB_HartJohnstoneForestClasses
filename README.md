@@ -1,32 +1,5 @@
 # WB_HartJohnstoneForestClasses
 
-## Scheduling update (2026-11-03)
-
-Classification occurs at simulation start and each core succession boundary, at
-priority 8.5 after core growth and summary. `WB_HJForestClassesTimeStep = NA`
-follows `Biomass_core$successionTimestep`; an explicit value must match it when
-coupled. Without a core, the default is 10 years. Optional plots run at 8.75 and
-saves at 9. Missing plot/save intervals use the resolved classification interval;
-initial plot/save times still control whether those outputs are enabled.
-This supersedes historical timing descriptions below; scientific rules are unchanged.
-
-## Additional conifers
-
-`otherConiferSp` adds conifers beyond the existing `jackPineSp`, `larchSp` and
-`spruceSp` groups. Its default is
-`c("Abie_", "Calc_", "Cham_", "Juni_", "Pinu_", "Pseu_", "Sequ_", "Taxu_", "Thuj_", "Tsug_")`.
-Entries are case-insensitive literal species-code prefixes. `character(0)`
-restores the previous three-group conifer definition.
-
-Cohorts are assigned to jack pine, larch, spruce, then other conifers, in that
-order. Overlapping prefixes never double-count biomass. The conifer-mix rule
-uses the combined biomass of all four groups (at least two thirds of total),
-after the unchanged jack-pine, larch and spruce dominance rules. Pure fir and
-lodgepole pine therefore default to conifer mix, not spruce or jack pine.
-The deciduous rule still uses residual biomass outside all four conifer groups
-(strictly more than two thirds); it does not explicitly identify deciduous taxa.
-Classification CSVs include `otherConiferPct` and `coniferPct`.
-
 ## Introduction
 
 WB_HartJohnstoneForestClasses is a [SpaDES](https://spades.predictiveecology.org/) 
@@ -106,7 +79,7 @@ Racine, P., Cumming, S.G. (2026) *WB_HartJohnstoneForestClasses: A SpaDES module
 | jackPineSp | character | \"Pinu\" | Jack pine species: Vector of case insensitive species codes e.g. c(\"Pinu_ban\", \"Pinu_con\"). Can also be the whole genus: \"Pinu\" |
 | larchSp | character | \"Lari\" | Larch species: Vector of case insensitive species codes e.g. c(\"Lari_lar\", \"Lari_occ\"). Can also be the whole genus: \"Lari\" |
 | spruceSp | character | \"Pice\" | Spruce species: Vector of case insensitive species codes e.g. c(\"Pice_gla\", \"Pice_mar\"). Can also be the whole genus: \"Pice\" |
-| otherConiferSp | character | See Additional conifers above | Additional conifer prefixes, applied only after jack pine, larch and spruce. Empty vector disables this group. |
+| otherConiferSp | character | `c("Abie_", "Calc_", "Cham_", "Juni_", "Pinu_", "Pseu_", "Sequ_", "Taxu_", "Thuj_", "Tsug_")` | Case-insensitive literal species-code prefixes for additional conifers. Applied after jack pine, larch and spruce, without double counting. `character(0)` disables this group. |
 | useDrainage | boolean | TRUE | Indicating if the drainage produced by the WB_VegBasedDrainage module should be taken into account to refine the spruce class into poorly-drained spruce (pd_spruce) and well-drained spruce (wd_spruce). If the WB_VegBasedDrainage module is not present, this parameter is ignored. |
 
 ### Expected Module Inputs
@@ -133,3 +106,28 @@ Soon...
 
 
 
+## Change History
+
+### 2026-11-04 — Additional conifers
+
+Added `otherConiferSp`, a character vector of case-insensitive literal
+species-code prefixes. Default:
+
+```r
+c("Abie_", "Calc_", "Cham_", "Juni_", "Pinu_", "Pseu_", "Sequ_", "Taxu_", "Thuj_", "Tsug_")
+```
+
+Jack pine, larch and spruce are assigned first; remaining matches become other
+conifers. All four groups contribute to conifer mix without double counting.
+Existing dominance thresholds are unchanged. Deciduous remains the residual
+outside these groups. Use `character(0)` for the previous behavior. CSV summaries
+now include `otherConiferPct` and `coniferPct`.
+
+### 2026-11-03 — Scheduling
+
+Classification now runs after core growth and summary, at simulation start and
+each succession boundary (priority 8.5). `WB_HJForestClassesTimeStep` now defaults
+to `NA`, following the core interval, or 10 years standalone. Explicit intervals
+must match the core. Optional plots and saves follow classification; their
+missing intervals use the classification interval. These changes supersede the
+older timing descriptions above.
