@@ -20,8 +20,8 @@ defineModule(sim, list(
                     "Describes the simulation time at which the first plot event should occur."),
     defineParameter(".plotInterval", "numeric", NA, NA, NA,
                     "Describes the simulation time interval between plot events."),
-    defineParameter("WB_HJForestClassesTimeStep", "numeric", 1, NA, NA,
-                     "Describes the simulation time at which the reclassify event should occur."),
+    defineParameter("WB_HJForestClassesTimeStep", "numeric", NA_real_, NA, NA,
+                     "NA follows the core succession interval (10 years standalone); an explicit value must match the core when coupled."),
     defineParameter(".saveInitialTime", "numeric", NA, NA, NA,
                     "Describes the simulation time at which the first save event should occur."),
     defineParameter(".saveInterval", "numeric", NA, NA, NA,
@@ -67,21 +67,36 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
     
     init = {
       sim <- Init(sim)
-      # schedule future event(s)
-      sim <- scheduleEvent(sim, time(sim), "WB_HartJohnstoneForestClasses", "reComputeHJForestClassesMap", 1)
-      sim <- scheduleEvent(sim, P(sim)$.plotInitialTime, "WB_HartJohnstoneForestClasses", "plot", 2)
-      sim <- scheduleEvent(sim, P(sim)$.saveInitialTime, "WB_HartJohnstoneForestClasses", "save", 2)
+      interval <- P(sim)$WB_HJForestClassesTimeStep
+      coreInterval <- params(sim)$Biomass_core$successionTimestep
+      if (is.na(interval)) interval <- if (is.null(coreInterval)) 10 else coreInterval
+      if (length(interval) != 1L || !is.finite(interval) || interval <= 0)
+        stop("Classification interval must be finite and positive.")
+      if (!is.null(coreInterval) && !isTRUE(all.equal(interval, as.numeric(coreInterval))))
+        stop("WB_HJForestClassesTimeStep must match Biomass_core successionTimestep.")
+      mod$classificationInterval <- interval
+      mod$classificationIndex <- 0L
+      sim <- scheduleEvent(sim, time(sim), "WB_HartJohnstoneForestClasses", "reComputeHJForestClassesMap", 8.5)
+      if (!is.na(P(sim)$.plotInitialTime))
+        sim <- scheduleEvent(sim, P(sim)$.plotInitialTime, "WB_HartJohnstoneForestClasses", "plot", 8.75)
+      if (!is.na(P(sim)$.saveInitialTime))
+        sim <- scheduleEvent(sim, P(sim)$.saveInitialTime, "WB_HartJohnstoneForestClasses", "save", 9)
     },
 
     reComputeHJForestClassesMap = {
       # browser()
       sim <- reComputeHJForestClassesMap(sim)
-      sim <- scheduleEvent(sim, time(sim) + P(sim)$WB_HJForestClassesTimeStep, "WB_HartJohnstoneForestClasses", "reComputeHJForestClassesMap", 1)
+      mod$classificationIndex <- mod$classificationIndex + 1L
+      nextTime <- start(sim) + mod$classificationIndex * mod$classificationInterval
+      if (nextTime <= end(sim))
+        sim <- scheduleEvent(sim, nextTime, "WB_HartJohnstoneForestClasses", "reComputeHJForestClassesMap", 8.5)
     },
 
     plot = {
       Plot(sim$WB_HartJohnstoneForestClassesMap)
-      sim <- scheduleEvent(sim, time(sim) + P(sim)$.plotInterval, "WB_HartJohnstoneForestClasses", "plot", 2)
+      interval <- if (is.na(P(sim)$.plotInterval)) mod$classificationInterval else P(sim)$.plotInterval
+      if (!is.finite(interval) || interval <= 0) stop("Plot interval must be finite and positive.")
+      sim <- scheduleEvent(sim, time(sim) + interval, "WB_HartJohnstoneForestClasses", "plot", 8.75)
     },
 
     save = {
@@ -90,7 +105,9 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
       terra::writeRaster(sim$WB_HartJohnstoneForestClassesMap, fname, datatype = "INT1U", overwrite = TRUE)
 
       # Reschedule the event
-      sim <- scheduleEvent(sim, time(sim) + P(sim)$.saveInterval, "WB_HartJohnstoneForestClasses", "save", 2)
+      interval <- if (is.na(P(sim)$.saveInterval)) mod$classificationInterval else P(sim)$.saveInterval
+      if (!is.finite(interval) || interval <= 0) stop("Save interval must be finite and positive.")
+      sim <- scheduleEvent(sim, time(sim) + interval, "WB_HartJohnstoneForestClasses", "save", 9)
     },
     warning(paste("Undefined event type: \'", current(sim)[1, "eventType", with = FALSE],
               "\' in module \'", current(sim)[1, "moduleName", with = FALSE], "\'", sep = ""))

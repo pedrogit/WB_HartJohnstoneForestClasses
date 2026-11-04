@@ -1,5 +1,15 @@
 # WB_HartJohnstoneForestClasses
 
+## Scheduling update (2026-11-03)
+
+Classification occurs at simulation start and each core succession boundary, at
+priority 8.5 after core growth and summary. `WB_HJForestClassesTimeStep = NA`
+follows `Biomass_core$successionTimestep`; an explicit value must match it when
+coupled. Without a core, the default is 10 years. Optional plots run at 8.75 and
+saves at 9. Missing plot/save intervals use the resolved classification interval;
+initial plot/save times still control whether those outputs are enabled.
+This supersedes historical timing descriptions below; scientific rules are unchanged.
+
 ## Introduction
 
 WB_HartJohnstoneForestClasses is a [SpaDES](https://spades.predictiveecology.org/) 

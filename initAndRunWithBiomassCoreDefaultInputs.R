@@ -76,7 +76,7 @@ sim <- SpaDES.core::simInitAndSpades(
   params = list(
     .globals = list(
        sppEquivCol = 'LandR'
-       , .useCache = c(".inputObjects", "init")
+       #, .useCache = c("init")
     ),
     # Biomass_borealDataPrep = list(overrideAgeInFires = FALSE
     # ),
@@ -93,8 +93,8 @@ sim <- SpaDES.core::simInitAndSpades(
                         seedingAlgorithm = "noSeeding",
                         .plots = NA,
                         calcSummaryBGM = NULL
-                        ,.useCache = FALSE
-                        # ,.useCache = c(".inputObjects", "init")
+                        #,.useCache = FALSE
+                        ,.useCache = c(".inputObjects", "init")
     ),
     
     WB_HartJohnstoneForestClasses = list(
