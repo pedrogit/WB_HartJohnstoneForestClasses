@@ -2,10 +2,10 @@
 # Create a factor list of cohortData species matching a vector of 
 # corresponding species IDs
 ##################################################################
-getCohortSpeciesFactors <- function(cohortData, speciesMatch){
-  # Make sure species is a char vector
-  if (!is.character(speciesMatch)) {
-    stop("`speciesMatch` must be a character vector of prefixes.")
+getCohortSpeciesFactors <- function(cohortData, speciesMatch, parameterName = "speciesMatch"){
+  if (!is.character(speciesMatch) || anyNA(speciesMatch) ||
+      any(!nzchar(trimws(speciesMatch)) | trimws(speciesMatch) != speciesMatch)) {
+    stop("`", parameterName, "` must be a character vector of nonblank prefixes without surrounding whitespace.")
   }
   # Create a list of unique species code factors
   uniqueSpCodes <- unique(cohortData$speciesCode)
@@ -14,13 +14,13 @@ getCohortSpeciesFactors <- function(cohortData, speciesMatch){
     stop("`speciesCode` must be a factor.")
   }
 
-  # get the list of matching SPCodes
-  matchingSpCodes <- grep(
-    pattern = paste0("^(", paste(speciesMatch, collapse = "|"), ")"),
-    x = levels(uniqueSpCodes),
-    ignore.case = TRUE,
-    value = TRUE
-  )
+  # All groups use literal prefixes; an empty vector deliberately matches nothing.
+  codes <- levels(uniqueSpCodes)
+  matching <- rep(FALSE, length(codes))
+  for (prefix in unique(tolower(speciesMatch))) {
+    matching <- matching | startsWith(tolower(codes), prefix)
+  }
+  matchingSpCodes <- codes[matching]
   
   speciesFactor <- uniqueSpCodes[uniqueSpCodes %in% matchingSpCodes]
   return (speciesFactor)
@@ -44,16 +44,6 @@ classifyStand <- function(
     classificationTablePath = NULL,
     otherConiferSp = c("Abie_", "Calc_", "Cham_", "Juni_", "Pinu_", "Pseu_", "Sequ_", "Taxu_", "Thuj_", "Tsug_")
 ) {
-  if (!is.character(otherConiferSp) || anyNA(otherConiferSp) ||
-      any(!nzchar(trimws(otherConiferSp)) | trimws(otherConiferSp) != otherConiferSp)) {
-    stop("`otherConiferSp` must be a character vector of nonblank prefixes without surrounding whitespace.")
-  }
-  # Literal prefixes avoid regex interpretation; an empty vector matches nothing.
-  otherConiferCodes <- rep(FALSE, nrow(cohortData))
-  for (prefix in unique(tolower(otherConiferSp))) {
-    otherConiferCodes <- otherConiferCodes |
-      startsWith(tolower(as.character(cohortData$speciesCode)), prefix)
-  }
   
   saveClassSummaryTable <- TRUE
   labels = c("deci", "mixed", "conimix", "jackpine", "larch", "spruce")
@@ -62,9 +52,10 @@ classifyStand <- function(
   colors <- c("#66c2a5", "#fc8d62", "#8da0cb", "#e78ac3", "#a6d854", "#ffd92f")
   
   # Convert species names to factors ids
-  jackPineFact <- getCohortSpeciesFactors(cohortData, jackPineSp)
-  larchFact <- getCohortSpeciesFactors(cohortData, larchSp)
-  spruceFact <- getCohortSpeciesFactors(cohortData, spruceSp)
+  jackPineFact <- getCohortSpeciesFactors(cohortData, jackPineSp, "jackPineSp")
+  larchFact <- getCohortSpeciesFactors(cohortData, larchSp, "larchSp")
+  spruceFact <- getCohortSpeciesFactors(cohortData, spruceSp, "spruceSp")
+  otherConiferFact <- getCohortSpeciesFactors(cohortData, otherConiferSp, "otherConiferSp")
 
   # Copy the main data table so we do not modify the original one
   cd <- cohortData
@@ -75,7 +66,7 @@ classifyStand <- function(
     speciesCode %in% jackPineFact, 1, # jackpine
     speciesCode %in% larchFact,    2, # larch
     speciesCode %in% spruceFact,   3, # spruce
-    otherConiferCodes,            4, # residual conifers only
+    speciesCode %in% otherConiferFact, 4, # residual conifers only
     default =                    5  # other
   )]
   

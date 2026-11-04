@@ -79,8 +79,15 @@ Racine, P., Cumming, S.G. (2026) *WB_HartJohnstoneForestClasses: A SpaDES module
 | jackPineSp | character | \"Pinu\" | Jack pine species: Vector of case insensitive species codes e.g. c(\"Pinu_ban\", \"Pinu_con\"). Can also be the whole genus: \"Pinu\" |
 | larchSp | character | \"Lari\" | Larch species: Vector of case insensitive species codes e.g. c(\"Lari_lar\", \"Lari_occ\"). Can also be the whole genus: \"Lari\" |
 | spruceSp | character | \"Pice\" | Spruce species: Vector of case insensitive species codes e.g. c(\"Pice_gla\", \"Pice_mar\"). Can also be the whole genus: \"Pice\" |
-| otherConiferSp | character | `c("Abie_", "Calc_", "Cham_", "Juni_", "Pinu_", "Pseu_", "Sequ_", "Taxu_", "Thuj_", "Tsug_")` | Case-insensitive literal species-code prefixes for additional conifers. Applied after jack pine, larch and spruce, without double counting. `character(0)` disables this group. |
+| otherConiferSp | character | `c("Abie_", "Calc_", "Cham_", "Juni_", "Pinu_", "Pseu_", "Sequ_", "Taxu_", "Thuj_", "Tsug_")` | Case-insensitive literal species-code prefixes for additional conifers. Applied after jack pine, larch and spruce, without double counting. An empty character vector disables this group. |
 | useDrainage | boolean | TRUE | Indicating if the drainage produced by the WB_VegBasedDrainage module should be taken into account to refine the spruce class into poorly-drained spruce (pd_spruce) and well-drained spruce (wd_spruce). If the WB_VegBasedDrainage module is not present, this parameter is ignored. |
+
+All four species parameters use case-insensitive literal prefix matching, not
+regular expressions. Missing, blank or whitespace-padded prefixes are rejected.
+
+An empty character vector specifies no species prefixes. For `otherConiferSp`,
+it disables additional conifers while leaving the jack-pine, larch and spruce
+settings unchanged.
 
 ### Expected Module Inputs
 
@@ -108,6 +115,13 @@ Soon...
 
 ## Change History
 
+### 2026-11-04 — Consistent species matching
+
+All four species parameters now share literal prefix matching and validation.
+Defaults, thresholds and group precedence are unchanged. Custom regex patterns
+are no longer interpreted: replace patterns such as `"^Pice"` or `"Pice.*"`
+with the prefix `"Pice"`. Empty vectors now consistently match nothing.
+
 ### 2026-11-04 — Additional conifers
 
 Added `otherConiferSp`, a character vector of case-insensitive literal
@@ -120,7 +134,7 @@ c("Abie_", "Calc_", "Cham_", "Juni_", "Pinu_", "Pseu_", "Sequ_", "Taxu_", "Thuj_
 Jack pine, larch and spruce are assigned first; remaining matches become other
 conifers. All four groups contribute to conifer mix without double counting.
 Existing dominance thresholds are unchanged. Deciduous remains the residual
-outside these groups. Use `character(0)` for the previous behavior. CSV summaries
+outside these groups. Use an empty character vector for the previous behavior. CSV summaries
 now include `otherConiferPct` and `coniferPct`.
 
 ### 2026-11-03 — Scheduling
