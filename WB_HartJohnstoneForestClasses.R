@@ -37,7 +37,7 @@ defineModule(sim, list(
     defineParameter("spruceSp", "character", c("Pice"), NA, NA,
                     "List of larch species. Can also be the whole genus: \"Pice\""),
     defineParameter("otherConiferSp", "character",
-                    c("Abie_", "Calc_", "Cham_", "Juni_", "Pinu_", "Pseu_", "Sequ_", "Taxu_", "Thuj_", "Tsug_"), NA, NA,
+                    c("Abie", "Calc", "Cham", "Juni", "Pinu", "Pseu", "Sequ", "Taxu", "Thuj", "Tsug"), NA, NA,
                     "Case-insensitive literal species-code prefixes for additional conifers. Assigned only after jack pine, larch and spruce; character(0) disables this group."),
     defineParameter("useDrainage", "logical", TRUE, NA, NA,
                     paste("Whether to use the WB_VegBasedDrainage module map to refine ",

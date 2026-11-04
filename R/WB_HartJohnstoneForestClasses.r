@@ -42,7 +42,7 @@ classifyStand <- function(
     spruceSp = c("Pice"), 
     drainageMap = NULL, 
     classificationTablePath = NULL,
-    otherConiferSp = c("Abie_", "Calc_", "Cham_", "Juni_", "Pinu_", "Pseu_", "Sequ_", "Taxu_", "Thuj_", "Tsug_")
+    otherConiferSp = c("Abie", "Calc", "Cham", "Juni", "Pinu", "Pseu", "Sequ", "Taxu", "Thuj", "Tsug")
 ) {
   
   saveClassSummaryTable <- TRUE
@@ -61,7 +61,7 @@ classifyStand <- function(
   cd <- cohortData
 
   # First match wins: named subtypes take precedence over other conifers.
-  # In particular, Pinu_ban also matches Pinu_ but its biomass is counted once.
+  # In particular, Pinu_ban also matches Pinu but its biomass is counted once.
   cd[, speciesNb := fcase(
     speciesCode %in% jackPineFact, 1, # jackpine
     speciesCode %in% larchFact,    2, # larch

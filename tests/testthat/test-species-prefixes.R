@@ -1,3 +1,28 @@
+test_that("genus defaults omit underscores without changing standard code matches", {
+  prefixes <- eval(formals(classifyStand)$otherConiferSp)
+  expect_identical(
+    prefixes,
+    c(
+      "Abie",
+      "Calc",
+      "Cham",
+      "Juni",
+      "Pinu",
+      "Pseu",
+      "Sequ",
+      "Taxu",
+      "Thuj",
+      "Tsug"
+    )
+  )
+  cohorts <- data.table(speciesCode = factor(paste0(prefixes, "_example")))
+  expect_identical(
+    getCohortSpeciesFactors(cohorts, prefixes),
+    getCohortSpeciesFactors(cohorts, paste0(prefixes, "_"))
+  )
+  expect_identical(eval(formals(classifyStand)$jackPineSp), "Pinu_ban")
+})
+
 test_that("species matching is literal, anchored and case insensitive", {
   cohorts <- data.table(
     speciesCode = factor(c(

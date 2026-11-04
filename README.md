@@ -79,7 +79,7 @@ Racine, P., Cumming, S.G. (2026) *WB_HartJohnstoneForestClasses: A SpaDES module
 | jackPineSp | character | \"Pinu\" | Jack pine species: Vector of case insensitive species codes e.g. c(\"Pinu_ban\", \"Pinu_con\"). Can also be the whole genus: \"Pinu\" |
 | larchSp | character | \"Lari\" | Larch species: Vector of case insensitive species codes e.g. c(\"Lari_lar\", \"Lari_occ\"). Can also be the whole genus: \"Lari\" |
 | spruceSp | character | \"Pice\" | Spruce species: Vector of case insensitive species codes e.g. c(\"Pice_gla\", \"Pice_mar\"). Can also be the whole genus: \"Pice\" |
-| otherConiferSp | character | `c("Abie_", "Calc_", "Cham_", "Juni_", "Pinu_", "Pseu_", "Sequ_", "Taxu_", "Thuj_", "Tsug_")` | Case-insensitive literal species-code prefixes for additional conifers. Applied after jack pine, larch and spruce, without double counting. An empty character vector disables this group. |
+| otherConiferSp | character | `c("Abie", "Calc", "Cham", "Juni", "Pinu", "Pseu", "Sequ", "Taxu", "Thuj", "Tsug")` | Case-insensitive literal species-code prefixes for additional conifers. Applied after jack pine, larch and spruce, without double counting. An empty character vector disables this group. |
 | useDrainage | boolean | TRUE | Indicating if the drainage produced by the WB_VegBasedDrainage module should be taken into account to refine the spruce class into poorly-drained spruce (pd_spruce) and well-drained spruce (wd_spruce). If the WB_VegBasedDrainage module is not present, this parameter is ignored. |
 
 All four species parameters use case-insensitive literal prefix matching, not
@@ -115,6 +115,13 @@ Soon...
 
 ## Change History
 
+### 2026-11-04 — Genus prefixes
+
+Removed trailing underscores from the `otherConiferSp` defaults to match the
+genus-prefix style of larch and spruce. Both forms match standard LandR codes;
+the shorter prefixes also accept codes without an underscore after the genus.
+The species-specific jack-pine default remains `"Pinu_ban"`.
+
 ### 2026-11-04 — Consistent species matching
 
 All four species parameters now share literal prefix matching and validation.
@@ -128,7 +135,7 @@ Added `otherConiferSp`, a character vector of case-insensitive literal
 species-code prefixes. Default:
 
 ```r
-c("Abie_", "Calc_", "Cham_", "Juni_", "Pinu_", "Pseu_", "Sequ_", "Taxu_", "Thuj_", "Tsug_")
+c("Abie", "Calc", "Cham", "Juni", "Pinu", "Pseu", "Sequ", "Taxu", "Thuj", "Tsug")
 ```
 
 Jack pine, larch and spruce are assigned first; remaining matches become other
