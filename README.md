@@ -80,6 +80,7 @@ Racine, P., Cumming, S.G. (2026) *WB_HartJohnstoneForestClasses: A SpaDES module
 | larchSp | character | \"Lari\" | Larch species: Vector of case insensitive species codes e.g. c(\"Lari_lar\", \"Lari_occ\"). Can also be the whole genus: \"Lari\" |
 | spruceSp | character | \"Pice\" | Spruce species: Vector of case insensitive species codes e.g. c(\"Pice_gla\", \"Pice_mar\"). Can also be the whole genus: \"Pice\" |
 | otherConiferSp | character | `c("Abie", "Calc", "Cham", "Juni", "Pinu", "Pseu", "Sequ", "Taxu", "Thuj", "Tsug")` | Case-insensitive literal species-code prefixes for additional conifers. Applied after jack pine, larch and spruce, without double counting. An empty character vector disables this group. |
+| writeClassificationCsv | boolean | FALSE | Whether to write the classification summary CSV (`WB_HartJohnstoneForestClasses_<time>.csv`, one row per pixel group with biomass shares and class) in the output path at each classification. |
 | useDrainage | boolean | TRUE | Indicating if the drainage produced by the WB_VegBasedDrainage module should be taken into account to refine the spruce class into poorly-drained spruce (pd_spruce) and well-drained spruce (wd_spruce). If the WB_VegBasedDrainage module is not present, this parameter is ignored. |
 
 All four species parameters use case-insensitive literal prefix matching, not
@@ -152,3 +153,9 @@ to `NA`, following the core interval, or 10 years standalone. Explicit intervals
 must match the core. Optional plots and saves follow classification; their
 missing intervals use the classification interval. These changes supersede the
 older timing descriptions above.
+
+### 2026-11-04 — Optional CSV summary
+
+Added `writeClassificationCsv` (default `FALSE`). The classification summary
+CSV is now written only when it is `TRUE`; previously it was always written.
+Classification results are unchanged.

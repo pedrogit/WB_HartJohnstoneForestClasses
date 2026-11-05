@@ -39,6 +39,9 @@ defineModule(sim, list(
     defineParameter("otherConiferSp", "character",
                     c("Abie", "Calc", "Cham", "Juni", "Pinu", "Pseu", "Sequ", "Taxu", "Thuj", "Tsug"), NA, NA,
                     "Case-insensitive literal species-code prefixes for additional conifers. Assigned only after jack pine, larch and spruce; character(0) disables this group."),
+    defineParameter("writeClassificationCsv", "logical", FALSE, NA, NA,
+                    paste("Whether to write a classification summary CSV file",
+                          "(WB_HartJohnstoneForestClasses_<time>.csv) in the output path at each classification.")),
     defineParameter("useDrainage", "logical", TRUE, NA, NA,
                     paste("Whether to use the WB_VegBasedDrainage module map to refine ",
                           "spruce classes into poorly-drained spruce (pd_spruce) and ",
@@ -174,7 +177,8 @@ reComputeHJForestClassesMap <- function(sim) {
     spruceSp = P(sim)$spruceSp,
     otherConiferSp = P(sim)$otherConiferSp,
     drainageMap = drainageMap,
-    classificationTablePath = file.path(getPaths()$outputPath, paste0("WB_HartJohnstoneForestClasses_", sprintf("%03d", time(sim)), ".csv"))
+    classificationTablePath = if (isTRUE(P(sim)$writeClassificationCsv))
+      file.path(getPaths()$outputPath, paste0("WB_HartJohnstoneForestClasses_", sprintf("%03d", time(sim)), ".csv"))
   )
   return(invisible(sim))
 }
