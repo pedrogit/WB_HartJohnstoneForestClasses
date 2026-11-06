@@ -158,7 +158,8 @@ test_that("missing inputs do not produce a result silently", {
   })
 })
 
-# Added with the fractional-time file names: the stamp used in output file names.
+# The stamp used in output file names: whole times are zero-padded, fractional times keep
+# their fraction.
 test_that("formatSimulationTime keeps whole-number names and keeps fractions", {
   expect_equal(formatSimulationTime(3), "003")
   expect_equal(formatSimulationTime(0), "000")

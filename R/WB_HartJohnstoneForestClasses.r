@@ -2,8 +2,7 @@
 # Format a simulation time for use in an output file name.
 # The whole part is zero-padded to 3 digits so files sort by time (003, 010, 100).
 # Whole-number times keep their original names (003); fractional times keep their
-# fraction (2.5 becomes 002.5). sprintf("%03d") cannot be used because it fails on
-# fractional times and on whole numbers stored as doubles beyond the integer range.
+# fraction (2.5 becomes 002.5).
 ##################################################################
 formatSimulationTime <- function(simTime) {
   if (length(simTime) != 1L || !is.numeric(simTime) || !is.finite(simTime) || simTime < 0) {
@@ -116,7 +115,7 @@ classifyStand <- function(
   # Keep subtype thresholds first. Deciduous is the non-conifer share (everything outside the
   # four conifer groups) and, like every other dominance rule, its boundary is inclusive:
   # Appendix S3 of Greuel et al. (2021, after Hart et al. 2019) defines deciduous as >= 66%
-  # broadleaf species. Before 2026-11-06 this one rule used a strict ">".
+  # broadleaf species.
   cdWithForestClass[, WB_HartJohnstoneForestClasses := fcase(
     (jackPineTotB / totB) >= dominancePct,                                 match("jackpine", labels),
     (larchTotB / totB)    >= 0.75,                                         match("larch", labels),
@@ -172,10 +171,9 @@ classifyStand <- function(
     #   ifel(WB_HartJohnstoneForestClassesMap == match("wd_spruce", labels),
     #   ifel(drainageMap == 2, match("wd_spruce", labels), match("pd_spruce", labels)),
     #   WB_HartJohnstoneForestClassesMap)
-    # Class 6 (wd_spruce) is the default for all spruce. Spruce on poorly drained ground
-    # (drainageMap == 1, as coded by WB_VegBasedDrainage) is moved to class 7 (pd_spruce).
-    # Fixed: this previously tested drainageMap == 2, which gave well-drained spruce the
-    # poorly-drained label and vice versa.
+    # Class 6 (wd_spruce) holds all spruce at first. Spruce on poorly drained ground
+    # (drainageMap == 1, as coded by WB_VegBasedDrainage) is moved to class 7 (pd_spruce);
+    # spruce on well drained ground (2) stays in class 6.
     WB_HartJohnstoneForestClassesMap[WB_HartJohnstoneForestClassesMap == match("wd_spruce", labels) & drainageMap == 1] <- 7L
   }
   
