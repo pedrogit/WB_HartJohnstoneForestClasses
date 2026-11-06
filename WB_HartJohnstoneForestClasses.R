@@ -66,23 +66,39 @@ defineModule(sim, list(
 ))
 
 # Events
+# SpaDES calls this function for each event of the module. The event type selects the branch:
+# init (once, at simulation start), reComputeHJForestClassesMap (the classification, repeated
+# every classification interval), plot and save (optional, only scheduled when their initial
+# times are set). Event priorities decide the order of events scheduled at the same time:
+# lower numbers run first, so classification (8.5) runs before plot (8.75) and save (9) and
+# they always see the freshly computed map.
 doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
   # browser()
   switch(
     eventType,
     
     init = {
+      # Prepare inputs (supplied or generated) and compute the first map.
       sim <- Init(sim)
+      # The classification interval follows Biomass_core's succession time step so the map is
+      # recomputed exactly when the cohorts change. When Biomass_core is absent (standalone
+      # runs) it falls back to 10 years. NA means "follow the core module".
       interval <- P(sim)$WB_HJForestClassesTimeStep
       coreInterval <- params(sim)$Biomass_core$successionTimestep
       if (is.na(interval)) interval <- if (is.null(coreInterval)) 10 else coreInterval
+      # Reject unusable intervals, and explicit values that would disagree with the core module.
       if (length(interval) != 1L || !is.finite(interval) || interval <= 0)
         stop("Classification interval must be finite and positive.")
       if (!is.null(coreInterval) && !isTRUE(all.equal(interval, as.numeric(coreInterval))))
         stop("WB_HJForestClassesTimeStep must match Biomass_core successionTimestep.")
+      # Keep the interval and the number of classifications done in the module environment.
+      # Next times are computed from the start time and this counter, not from
+      # time(sim) + interval, so they never drift from the succession schedule.
       mod$classificationInterval <- interval
       mod$classificationIndex <- 0L
+      # First classification at the simulation start time.
       sim <- scheduleEvent(sim, time(sim), "WB_HartJohnstoneForestClasses", "reComputeHJForestClassesMap", 8.5)
+      # Plot and save are opt-in: they are only scheduled when an initial time is given (not NA).
       if (!is.na(P(sim)$.plotInitialTime))
         sim <- scheduleEvent(sim, P(sim)$.plotInitialTime, "WB_HartJohnstoneForestClasses", "plot", 8.75)
       if (!is.na(P(sim)$.saveInitialTime))
@@ -90,8 +106,10 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
     },
 
     reComputeHJForestClassesMap = {
-      # browser()
+      # Classify the stands from the current cohort data and replace the map in sim.
       sim <- reComputeHJForestClassesMap(sim)
+      # Count this classification and schedule the next one, unless it would fall after the
+      # end of the simulation.
       mod$classificationIndex <- mod$classificationIndex + 1L
       nextTime <- start(sim) + mod$classificationIndex * mod$classificationInterval
       if (nextTime <= end(sim))
@@ -99,25 +117,32 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
     },
 
     plot = {
+      # Draw the current map. Plot() is from SpaDES.core and uses the active plotting device.
       Plot(sim$WB_HartJohnstoneForestClassesMap)
+      # Plot at .plotInterval, or at the classification interval when it is NA.
       interval <- if (is.na(P(sim)$.plotInterval)) mod$classificationInterval else P(sim)$.plotInterval
       if (!is.finite(interval) || interval <= 0) stop("Plot interval must be finite and positive.")
       sim <- scheduleEvent(sim, time(sim) + interval, "WB_HartJohnstoneForestClasses", "plot", 8.75)
     },
 
     save = {
-      # Save the reclassified raster
+      # Save the current map as a GeoTIFF named with the zero-padded simulation time
+      # (for example WB_HartJohnstoneForestClasses_050.tif) in the simulation output folder.
+      # INT1U (unsigned 8 bit) is enough because class codes are 1 to 7. A file with the
+      # same name is overwritten.
       fname <- file.path(outputPath(sim), paste0("WB_HartJohnstoneForestClasses_", sprintf("%03d", time(sim)), ".tif"))
       terra::writeRaster(sim$WB_HartJohnstoneForestClassesMap, fname, datatype = "INT1U", overwrite = TRUE)
 
-      # Reschedule the event
+      # Reschedule at .saveInterval, or at the classification interval when it is NA.
       interval <- if (is.na(P(sim)$.saveInterval)) mod$classificationInterval else P(sim)$.saveInterval
       if (!is.finite(interval) || interval <= 0) stop("Save interval must be finite and positive.")
       sim <- scheduleEvent(sim, time(sim) + interval, "WB_HartJohnstoneForestClasses", "save", 9)
     },
+    # Any other event type is a programming error: warn instead of silently ignoring it.
     warning(paste("Undefined event type: \'", current(sim)[1, "eventType", with = FALSE],
               "\' in module \'", current(sim)[1, "moduleName", with = FALSE], "\'", sep = ""))
   )
+  # SpaDES expects the modified simulation object back.
   return(invisible(sim))
 }
 
