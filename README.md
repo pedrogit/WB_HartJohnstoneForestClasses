@@ -129,6 +129,14 @@ Soon...
 
 ## Change History
 
+### 2026-11-06 — Fractional simulation times in file names
+
+The saved TIFF and the optional CSV were named with `sprintf("%03d", time(sim))`, which
+fails when the simulation time is fractional (for example 2.5). File names are now built by
+`formatSimulationTime()`. Whole-number times keep their existing names
+(`WB_HartJohnstoneForestClasses_003.tif`); fractional times keep their fraction
+(`WB_HartJohnstoneForestClasses_002.5.tif`).
+
 ### 2026-11-06 — Drainage labels corrected
 
 WB_VegBasedDrainage codes 1 as poorly drained and 2 as well drained. The module

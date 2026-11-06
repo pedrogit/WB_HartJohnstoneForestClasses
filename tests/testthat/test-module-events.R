@@ -157,3 +157,40 @@ test_that("missing inputs do not produce a result silently", {
       paths = simPaths("missing-inputs", clean = TRUE))))
   })
 })
+
+# Added with the fractional-time file names: the stamp used in output file names.
+test_that("formatSimulationTime keeps whole-number names and keeps fractions", {
+  expect_equal(formatSimulationTime(3), "003")
+  expect_equal(formatSimulationTime(0), "000")
+  expect_equal(formatSimulationTime(100), "100")
+  expect_equal(formatSimulationTime(1234), "1234")
+  expect_equal(formatSimulationTime(2.5), "002.5")
+  expect_equal(formatSimulationTime(0.25), "000.25")
+  # Floating point noise is not written into the name.
+  expect_equal(formatSimulationTime(2.1), "002.1")
+  expect_equal(formatSimulationTime(0.1 + 0.2), "000.3")
+  # Names of different times sort in time order.
+  stamps <- vapply(c(0.5, 2, 10, 2.5), formatSimulationTime, character(1))
+  expect_equal(stamps[order(stamps)], c("000.5", "002", "002.5", "010"))
+  expect_error(formatSimulationTime(NA_real_), "single finite")
+  expect_error(formatSimulationTime(-1), "single finite")
+  expect_error(formatSimulationTime(c(1, 2)), "single finite")
+  expect_error(formatSimulationTime("3"), "single finite")
+})
+
+test_that("fractional simulation times give fractional TIFF and CSV names", {
+  skip_if_not_installed("SpaDES.core")
+  withSpades({
+    sim <- SpaDES.core::spades(makeSim("fractional", list(
+      WB_HJForestClassesTimeStep = 1.5, writeClassificationCsv = TRUE, jackPineSp = "Jack",
+      larchSp = "Lar", spruceSp = "Spr", otherConiferSp = "Other",
+      .saveInitialTime = 0.5, .saveInterval = 2),
+      times = list(start = 0.5, end = 4, timeunit = "year")))
+    expect_equal(moduleEvents(sim, "reComputeHJForestClassesMap")$eventTime, c(0.5, 2, 3.5))
+    outputs <- list.files(simPaths("fractional")$outputPath)
+    expect_equal(sort(grep("\\.csv$", outputs, value = TRUE)),
+                 paste0("WB_HartJohnstoneForestClasses_", c("000.5", "002", "003.5"), ".csv"))
+    expect_equal(sort(grep("\\.tif$", outputs, value = TRUE)),
+                 paste0("WB_HartJohnstoneForestClasses_", c("000.5", "002.5"), ".tif"))
+  })
+})

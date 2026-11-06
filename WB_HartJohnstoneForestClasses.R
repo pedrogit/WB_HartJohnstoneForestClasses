@@ -127,10 +127,11 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
 
     save = {
       # Save the current map as a GeoTIFF named with the zero-padded simulation time
-      # (for example WB_HartJohnstoneForestClasses_050.tif) in the simulation output folder.
+      # (for example WB_HartJohnstoneForestClasses_050.tif, or _002.5.tif for a fractional
+      # time) in the simulation output folder.
       # INT1U (unsigned 8 bit) is enough because class codes are 1 to 7. A file with the
       # same name is overwritten.
-      fname <- file.path(outputPath(sim), paste0("WB_HartJohnstoneForestClasses_", sprintf("%03d", time(sim)), ".tif"))
+      fname <- file.path(outputPath(sim), paste0("WB_HartJohnstoneForestClasses_", formatSimulationTime(time(sim)), ".tif"))
       terra::writeRaster(sim$WB_HartJohnstoneForestClassesMap, fname, datatype = "INT1U", overwrite = TRUE)
 
       # Reschedule at .saveInterval, or at the classification interval when it is NA.
@@ -203,7 +204,7 @@ reComputeHJForestClassesMap <- function(sim) {
     otherConiferSp = P(sim)$otherConiferSp,
     drainageMap = drainageMap,
     classificationTablePath = if (isTRUE(P(sim)$writeClassificationCsv))
-      file.path(getPaths()$outputPath, paste0("WB_HartJohnstoneForestClasses_", sprintf("%03d", time(sim)), ".csv"))
+      file.path(getPaths()$outputPath, paste0("WB_HartJohnstoneForestClasses_", formatSimulationTime(time(sim)), ".csv"))
   )
   return(invisible(sim))
 }

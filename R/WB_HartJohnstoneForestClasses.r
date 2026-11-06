@@ -1,4 +1,26 @@
 ##################################################################
+# Format a simulation time for use in an output file name.
+# The whole part is zero-padded to 3 digits so files sort by time (003, 010, 100).
+# Whole-number times keep their original names (003); fractional times keep their
+# fraction (2.5 becomes 002.5). sprintf("%03d") cannot be used because it fails on
+# fractional times and on whole numbers stored as doubles beyond the integer range.
+##################################################################
+formatSimulationTime <- function(simTime) {
+  if (length(simTime) != 1L || !is.numeric(simTime) || !is.finite(simTime) || simTime < 0) {
+    stop("`simTime` must be a single finite non-negative number.")
+  }
+  whole <- floor(simTime)
+  stamp <- sprintf("%03.0f", whole)
+  fraction <- simTime - whole
+  if (fraction != 0) {
+    # 15 significant digits hide floating point noise (2.1 - 2 is not exactly 0.1).
+    # The leading zero of "0.5" is dropped so the stamp reads 002.5.
+    stamp <- paste0(stamp, sub("^0", "", format(fraction, digits = 15, scientific = FALSE)))
+  }
+  stamp
+}
+
+##################################################################
 # Create a factor list of cohortData species matching a vector of 
 # corresponding species IDs
 ##################################################################
