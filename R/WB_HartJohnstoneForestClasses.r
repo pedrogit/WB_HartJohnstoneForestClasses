@@ -147,7 +147,11 @@ classifyStand <- function(
     #   ifel(WB_HartJohnstoneForestClassesMap == match("wd_spruce", labels),
     #   ifel(drainageMap == 2, match("wd_spruce", labels), match("pd_spruce", labels)),
     #   WB_HartJohnstoneForestClassesMap)
-    WB_HartJohnstoneForestClassesMap[WB_HartJohnstoneForestClassesMap == match("wd_spruce", labels) & drainageMap == 2] <- 7L
+    # Class 6 (wd_spruce) is the default for all spruce. Spruce on poorly drained ground
+    # (drainageMap == 1, as coded by WB_VegBasedDrainage) is moved to class 7 (pd_spruce).
+    # Fixed: this previously tested drainageMap == 2, which gave well-drained spruce the
+    # poorly-drained label and vice versa.
+    WB_HartJohnstoneForestClassesMap[WB_HartJohnstoneForestClassesMap == match("wd_spruce", labels) & drainageMap == 1] <- 7L
   }
   
   # rasterizeReduced might produce a RasterLayer object if pixelGroupMap is a RasterLayer

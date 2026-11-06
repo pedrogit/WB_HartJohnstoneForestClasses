@@ -48,13 +48,14 @@ test_that("drainage only splits the spruce class and leaves other cells unchange
   without <- classValues(classifyQuietly(d, map))
   expect_equal(without, c(6, 6, 4, 1))
   with <- classifyQuietly(d, map, drainageMap = drainage)
-  # Cells that are not spruce keep their class, and a drainage value of 1 keeps spruce as 6.
-  expect_equal(classValues(with)[c(1, 3, 4)], c(6, 4, 1))
-  # A drainage value of 2 moves spruce to the extra class 7.
-  expect_equal(classValues(with)[2], 7)
-  # The legend gains a seventh class with its own colour. The label text of classes 6 and 7
-  # is deliberately not asserted: the original has known inverted drainage labels.
+  # WB_VegBasedDrainage codes 1 = poorly drained and 2 = well drained.
+  # Cells that are not spruce keep their class, and well-drained spruce (2) stays class 6.
+  expect_equal(classValues(with)[c(2, 3, 4)], c(6, 4, 1))
+  # Poorly-drained spruce (1) moves to the extra class 7.
+  expect_equal(classValues(with)[1], 7)
+  # The legend gains a seventh class with its own colour, and the labels match the drainage coding.
   expect_equal(levels(with)[[1]]$ID, 1:7)
+  expect_equal(levels(with)[[1]]$class[6:7], c("wd_spruce", "pd_spruce"))
   expect_equal(nrow(coltab(with)[[1]]), 7L)
   expect_identical(names(with), "standtype")
 })

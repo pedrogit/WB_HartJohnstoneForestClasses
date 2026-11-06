@@ -3,8 +3,8 @@
 # itself is also tested directly on classifyStand() in test-drainage-and-csv.R. Shared helpers
 # are in helper-simulation.R.
 #
-# The labels of classes 6 and 7 are deliberately not asserted: the original has known
-# inverted drainage labels (a flaw that is intentionally left alone).
+# Drainage coding (from WB_VegBasedDrainage): 1 = poorly drained, 2 = well drained.
+# Class 6 is well-drained spruce and class 7 is poorly-drained spruce.
 
 # Builds a simulation with the given drainage parameter and optional drainage map input.
 makeDrainageSim <- function(name, useDrainage, withMap) {
@@ -30,10 +30,11 @@ test_that("useDrainage = TRUE with a supplied map splits the spruce class", {
   withSpades({
     sim <- SpaDES.core::spades(makeDrainageSim("drainage-on", TRUE, withMap = TRUE))
     result <- sim$WB_HartJohnstoneForestClassesMap
-    # Spruce cell on poorly drained ground (1) stays 6; on well drained ground (2) it becomes 7.
+    # Spruce on poorly drained ground (1) becomes 7; on well drained ground (2) it stays 6.
     # The jack pine and poplar cells are unchanged.
-    expect_equal(classValues(result), c(6, 7, 4, 1))
+    expect_equal(classValues(result), c(7, 6, 4, 1))
     expect_equal(levels(result)[[1]]$ID, 1:7)
+    expect_equal(levels(result)[[1]]$class[6:7], c("wd_spruce", "pd_spruce"))
     expect_equal(nrow(coltab(result)[[1]]), 7L)
     expect_identical(names(result), "standtype")
   })

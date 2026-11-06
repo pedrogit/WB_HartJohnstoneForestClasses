@@ -48,8 +48,8 @@ If the WB_VegBasedDrainage module is part of the SpaDES simulation model, the WB
 | Class Code | Description |
 |-----------|-------------|
 | 1-5 | Other non-spruce classes |
-| 6 | Well-drained spruce |
-| 7 | Poorly-drained spruce |
+| 6 | Well-drained spruce (drainage map value 2) |
+| 7 | Poorly-drained spruce (drainage map value 1) |
 
 Class 7 is only produced when module parameter **useDrainage** is equal to TRUE and the WB_VegBasedDrainage module is present. Otherwise Class 6 combines spruce pixels of all drainage classes.
 
@@ -128,6 +128,15 @@ Soon...
 
 
 ## Change History
+
+### 2026-11-06 — Drainage labels corrected
+
+WB_VegBasedDrainage codes 1 as poorly drained and 2 as well drained. The module
+previously moved spruce to class 7 where the drainage map was 2, so well-drained spruce
+carried the poorly-drained label and the reverse. Spruce on poorly drained ground (1) now
+becomes class 7 (`pd_spruce`) and spruce on well drained ground (2) stays class 6
+(`wd_spruce`). Results with a drainage map change for every spruce cell: classes 6 and 7
+are swapped. Results without a drainage map are unchanged.
 
 ### 2026-11-04 — Genus prefixes
 
