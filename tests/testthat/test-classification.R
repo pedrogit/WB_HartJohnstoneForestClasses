@@ -57,13 +57,14 @@ test_that("two-thirds and 75 percent thresholds sit on the inclusive side", {
       B = as.vector(rbind(share, 1 - share)))
     expect_equal(classValues(classifyQuietly(d, map)), case$expected, info = case$species)
   }
-  # The deciduous test is strict and is computed as 1 - conifer share.
+  # The deciduous test is inclusive too (>= 2/3, Appendix S3: >= 66% broadleaf) and is
+  # computed as 1 - conifer share. The middle case sits exactly on the boundary: deci, not mixed.
   conifer <- (1 - 2/3) + c(epsilon, 0, -epsilon)
   d <- data.table(
     pixelGroup = rep(1:3, each = 2),
     speciesCode = factor(rep(c("Abie_bal", "Popu_tre"), 3)),
     B = as.vector(rbind(conifer, 1 - conifer)))
-  expect_equal(classValues(classifyQuietly(d, map)), c(2, 2, 1))
+  expect_equal(classValues(classifyQuietly(d, map)), c(2, 1, 1))
 })
 
 test_that("rule priority: jack pine, larch, spruce, conifer mix, deciduous, mixed", {

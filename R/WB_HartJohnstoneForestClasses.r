@@ -88,13 +88,16 @@ classifyStand <- function(
   # Determine the stand class based on relative biomass
   dominancePct <- 2/3 # Set a dominance threshold
 
-  # Keep subtype thresholds first; deciduous remains the non-conifer residual.
+  # Keep subtype thresholds first. Deciduous is the non-conifer share (everything outside the
+  # four conifer groups) and, like every other dominance rule, its boundary is inclusive:
+  # Appendix S3 of Greuel et al. (2021, after Hart et al. 2019) defines deciduous as >= 66%
+  # broadleaf species. Before 2026-11-06 this one rule used a strict ">".
   cdWithForestClass[, WB_HartJohnstoneForestClasses := fcase(
     (jackPineTotB / totB) >= dominancePct,                                 match("jackpine", labels),
     (larchTotB / totB)    >= 0.75,                                         match("larch", labels),
     (spruceTotB / totB)   >= dominancePct,                                 match("spruce", labels),
     (coniferTotB / totB) >= dominancePct,                                 match("conimix", labels),
-    (1 - coniferTotB / totB) > dominancePct,                               match("deci", labels),
+    (1 - coniferTotB / totB) >= dominancePct,                              match("deci", labels),
     default =                                                              match("mixed", labels)
   )]
 

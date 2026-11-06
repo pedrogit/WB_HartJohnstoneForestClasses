@@ -18,7 +18,7 @@ The components of the module ensemble are:
 These modules are derived from extensive empirical research in the northwest boreal of North America, as described in [Greuel and Degré-Timmons et al (2021)](https://esajournals-onlinelibrary-wiley-com.acces.bibl.ulaval.ca/doi/full/10.1002/ecs2.3481), Casheiro-Guilhem et. al (in prep.) and foundational papers by [Hart and Johnstone et al. (2018)](https://onlinelibrary.wiley.com/doi/abs/10.1111/gcb.14550).
 
 ## WB_HartJohnstoneForestClasses Module Overview
-At each simulation step, WB_HartJohnstoneForestClasses classifies LandR cohort data produced by Biomass_core into 6 (or 7) forest classes. The classification is based on total species' biomasses, according to the plot basal-area classification rules found in [Hart, Henkelman et al. (2019)](https://onlinelibrary.wiley.com/doi/abs/10.1111/gcb.14550). 
+At each simulation step, WB_HartJohnstoneForestClasses classifies LandR cohort data produced by Biomass_core into 6 (or 7) forest classes. The classification is based on total species' biomasses, adapting the stand-type definitions in Appendix S3 of [Greuel and Degré-Timmons et al. (2021)](https://doi.org/10.1002/ecs2.3481), which follow [Hart et al. (2019)](https://onlinelibrary.wiley.com/doi/abs/10.1111/gcb.14550). Hart et al. judge dominance from relative live basal area (or stem density for stands under 20 years since fire). This module uses biomass instead.
 
 | Class Code | Description |
 |-----------|-------------|
@@ -29,6 +29,19 @@ At each simulation step, WB_HartJohnstoneForestClasses classifies LandR cohort d
 | 5 | Larch |
 | 6 | Spruce |
 | NA | LandR non-forested pixels |
+
+The rules are tested in this order on the total biomass of each pixel group (every cohort and age summed). All thresholds are inclusive (`>=`), and there is no floating-point tolerance:
+
+| Priority | Class | Rule | Appendix S3 rule |
+|---:|---|---|---|
+| 1 | 4 Jack pine | jack pine share >= 2/3 | >= 66% jack pine |
+| 2 | 5 Larch | larch share >= 0.75 | > 75% larch |
+| 3 | 6 Spruce | spruce share >= 2/3 | >= 66% spruce |
+| 4 | 3 Conifer mix | all conifer groups >= 2/3 | < 66% spruce or jack pine but >= 2/3 conifer |
+| 5 | 1 Deciduous | non-conifer share (1 - conifer share) >= 2/3 | >= 66% broadleaf deciduous species |
+| 6 | 2 Conifer–deciduous mix | everything else, including groups with zero biomass | < 66% broadleaf deciduous and < 66% conifer |
+
+Differences from Appendix S3 that remain: thresholds use 2/3 where the appendix writes 66%; larch is inclusive at 0.75 where the appendix says "> 75%"; the deciduous class is the share of all biomass outside the four conifer groups, which includes unrecognised or missing species codes, instead of the share of broadleaf deciduous species; the mixed class is the default for everything else, so it also receives stands that the appendix leaves undefined; and biomass replaces basal area and stem density.
 
 If the WB_VegBasedDrainage module is part of the SpaDES simulation model, the WB_HartJohnstoneForestClasses spruce class will be refined to well-drained and poorly-drained spruce following to the two drainage classes produced by WB_VegBasedDrainage :
 
@@ -159,3 +172,12 @@ older timing descriptions above.
 Added `writeClassificationCsv` (default `FALSE`). The classification summary
 CSV is now written only when it is `TRUE`; previously it was always written.
 Classification results are unchanged.
+
+### 2026-11-06 — Inclusive deciduous boundary
+
+The deciduous rule is now `1 - conifer share >= 2/3` instead of `> 2/3`, so that it is
+inclusive like every other dominance rule and like Appendix S3 of Greuel et al. (2021)
+(">= 66% broadleaf deciduous species"). A pixel group whose non-conifer share is exactly
+2/3 is now deciduous instead of mixed. No pixel group of the year 0, 50 or 100 snapshots
+(82,928 cells each) sits exactly on the boundary, so their maps are unchanged. The
+classification rules table above now lists the Appendix S3 rule next to each rule.
