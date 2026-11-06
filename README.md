@@ -129,6 +129,16 @@ Soon...
 
 ## Change History
 
+### 2026-11-06 — cohortData is no longer modified
+
+`classifyStand()` added a `speciesNb` column to the `cohortData` table it received, because
+`cd <- cohortData` does not copy a data.table. In a simulation this table is
+`sim$cohortData`, which belongs to Biomass_core. The function now works on a copy of the
+three columns it uses (`pixelGroup`, `speciesCode`, `B`), so the caller's table is left
+unchanged, a stale `speciesNb` column in the input is ignored, and a plain data.frame is
+accepted. Classification results are unchanged (identical maps on the year 0, 50 and 100
+snapshots).
+
 ### 2026-11-06 — Fractional simulation times in file names
 
 The saved TIFF and the optional CSV were named with `sprintf("%03d", time(sim))`, which

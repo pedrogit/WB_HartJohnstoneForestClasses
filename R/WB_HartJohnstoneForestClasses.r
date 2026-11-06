@@ -54,7 +54,7 @@ getCohortSpeciesFactors <- function(cohortData, speciesMatch, parameterName = "s
 
 ##################################################################
 # Class a whole cohort data table based on relative biomass
-# For now classifyStand does not modify cohortData. It only produces a raster.
+# classifyStand does not modify cohortData. It works on a copy and only produces a raster.
 ##################################################################
 classifyStand <- function(
     cohortData, 
@@ -79,8 +79,11 @@ classifyStand <- function(
   spruceFact <- getCohortSpeciesFactors(cohortData, spruceSp, "spruceSp")
   otherConiferFact <- getCohortSpeciesFactors(cohortData, otherConiferSp, "otherConiferSp")
 
-  # Copy the main data table so we do not modify the original one
-  cd <- cohortData
+  # Work on a copy holding only the columns used here. Selecting columns creates a new table
+  # (a plain assignment of a data.table would only add a second name for the same object), so
+  # the speciesNb column added below stays local to this function. Any speciesNb column in
+  # the input is not copied, and as.data.table() also accepts a plain data.frame.
+  cd <- data.table::as.data.table(cohortData)[, .(pixelGroup, speciesCode, B)]
 
   # First match wins: named subtypes take precedence over other conifers.
   # In particular, Pinu_ban also matches Pinu but its biomass is counted once.

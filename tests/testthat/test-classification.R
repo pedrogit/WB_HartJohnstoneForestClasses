@@ -104,13 +104,67 @@ test_that("classification is repeatable and independent of row order", {
     speciesCode = factor(rep(c("Pinu_ban", "Popu_tre"), 6)),
     B = c(90, 10, 60, 40, 10, 90, 40, 60, 20, 80, 70, 30))
   first <- classValues(classifyQuietly(copy(d), map))
-  # classifyStand() adds a speciesNb column to the table it receives (a known original
-  # behaviour); calling it again on that same table must not change the result.
+  # classifyStand() works on its own copy, so calling it again on the same table gives the
+  # same result (the table is also checked for modification in a test below).
   reused <- copy(d)
   invisible(classifyQuietly(reused, map))
   expect_equal(classValues(classifyQuietly(reused, map)), first)
   # Shuffling the cohort rows must not change the classes.
   expect_equal(classValues(classifyQuietly(d[c(12:1)], map)), first)
+})
+
+# classifyStand() works on its own copy of the cohort columns it needs, so the table it
+# receives keeps its columns, values, key and memory address.
+test_that("classifyStand() does not modify the cohortData it receives", {
+  map <- rast(nrows = 1, ncols = 4, vals = 1:4)
+  d <- data.table(
+    pixelGroup = 1:4, speciesCode = factor(c("Pinu_ban", "Lari_lar", "Pice_mar", "Popu_tre")),
+    B = 100, age = c(10L, 20L, 30L, 40L))
+  setkey(d, pixelGroup)
+  before <- copy(d)
+  addressBefore <- data.table::address(d)
+  invisible(classifyQuietly(d, map))
+  # Same columns, values, order, key and object: nothing was added, changed or reallocated.
+  expect_identical(names(d), names(before))
+  expect_identical(d, before)
+  expect_identical(key(d), "pixelGroup")
+  expect_identical(data.table::address(d), addressBefore)
+  expect_false("speciesNb" %in% names(d))
+})
+
+test_that("an existing speciesNb column is left as it is and does not affect the result", {
+  map <- rast(nrows = 1, ncols = 4, vals = 1:4)
+  d <- data.table(
+    pixelGroup = 1:4, speciesCode = factor(c("Pinu_ban", "Lari_lar", "Pice_mar", "Popu_tre")),
+    B = 100)
+  clean <- classValues(classifyQuietly(d, map))
+  withNb <- copy(d)
+  # A stale column with values that would change the classes if it were used.
+  withNb[, speciesNb := c(5, 5, 5, 5)]
+  before <- copy(withNb)
+  expect_equal(classValues(classifyQuietly(withNb, map)), clean)
+  expect_identical(withNb, before)
+})
+
+test_that("a plain data.frame is accepted and left unchanged", {
+  map <- rast(nrows = 1, ncols = 2, vals = 1:2)
+  df <- data.frame(pixelGroup = 1:2, speciesCode = factor(c("Pinu_ban", "Popu_tre")), B = 100)
+  expect_equal(classValues(classifyQuietly(df, map)), c(4, 1))
+  expect_identical(names(df), c("pixelGroup", "speciesCode", "B"))
+})
+
+test_that("the cohortData of a simulation is not modified by the module", {
+  skip_if_not_installed("SpaDES.core")
+  withSpades({
+    inputs <- spruceInputs()
+    before <- copy(inputs$cohortData)
+    sim <- SpaDES.core::spades(SpaDES.core::simInit(
+      modules = moduleName, times = list(start = 0, end = 0, timeunit = "year"),
+      params = list(WB_HartJohnstoneForestClasses = list(useDrainage = FALSE)),
+      objects = inputs, paths = simPaths("cohortdata-untouched", clean = TRUE)))
+    expect_identical(sim$cohortData, before)
+    expect_false("speciesNb" %in% names(sim$cohortData))
+  })
 })
 
 test_that("custom species prefixes drive the groups, including empty vectors", {
