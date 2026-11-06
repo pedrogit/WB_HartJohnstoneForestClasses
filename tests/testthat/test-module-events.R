@@ -28,21 +28,22 @@ test_that("parameter names and defaults are as documented", {
     expected <- list(.plots = "screen",
       .useCache = FALSE, jackPineSp = "Pinu_ban", larchSp = "Lari", spruceSp = "Pice",
       otherConiferSp = c("Abie", "Calc", "Cham", "Juni", "Pinu", "Pseu", "Sequ", "Taxu", "Thuj", "Tsug"),
-      writeClassificationCsv = FALSE)
+      writeClassificationCsv = FALSE, plotAndSaveFinalSummary = TRUE)
     for (name in names(expected)) expect_equal(p[[name]], expected[[name]], info = name)
     for (name in naParameters) expect_true(is.na(p[[name]]), info = name)
     expect_true("useDrainage" %in% names(p))
   })
 })
 
-test_that("by default the module classifies at the start only and writes no file", {
+test_that("by default the module classifies at the start only and saves the final summary", {
   skip_if_not_installed("SpaDES.core")
   withSpades({
     # With a standalone run the interval is 10 years, so a 3 to 7 run classifies only at 3.
     sim <- SpaDES.core::spades(makeSim("defaults"))
     expect_equal(moduleEvents(sim, "reComputeHJForestClassesMap")$eventTime, 3)
     expect_equal(moduleEvents(sim, "reComputeHJForestClassesMap")$eventPriority, 8.5)
-    expect_length(list.files(simPaths("defaults")$outputPath), 0)
+    expect_equal(list.files(simPaths("defaults")$outputPath),
+                 "WB_HartJohnstoneForestClasses_finalSummary_007.png")
     expect_equal(nrow(moduleEvents(sim, "save")), 0L)
     # Default species prefixes: Jack/Lar/Spr/Other do not match, so everything is deciduous.
     expect_equal(classValues(sim$WB_HartJohnstoneForestClassesMap), rep(1, 4))

@@ -94,6 +94,7 @@ Racine, P., Cumming, S.G. (2026) *WB_HartJohnstoneForestClasses: A SpaDES module
 | spruceSp | character | \"Pice\" | Spruce species: Vector of case insensitive species codes e.g. c(\"Pice_gla\", \"Pice_mar\"). Can also be the whole genus: \"Pice\" |
 | otherConiferSp | character | `c("Abie", "Calc", "Cham", "Juni", "Pinu", "Pseu", "Sequ", "Taxu", "Thuj", "Tsug")` | Case-insensitive literal species-code prefixes for additional conifers. Applied after jack pine, larch and spruce, without double counting. An empty character vector disables this group. |
 | writeClassificationCsv | boolean | FALSE | Whether to write the classification summary CSV (`WB_HartJohnstoneForestClasses_<time>.csv`, one row per pixel group with biomass shares and class) in the output path at each classification. |
+| plotAndSaveFinalSummary | logical | TRUE | Display and save a PNG of stacked forest-class areas (ha) at simulation end. Independent of recurring map plots and TIFF saving. |
 | useDrainage | boolean | TRUE | Indicating if the drainage produced by the WB_VegBasedDrainage module should be taken into account to refine the spruce class into poorly-drained spruce (pd_spruce) and well-drained spruce (wd_spruce). If the WB_VegBasedDrainage module is not present, this parameter is ignored. |
 
 All four species parameters use case-insensitive literal prefix matching, not
@@ -102,6 +103,25 @@ regular expressions. Missing, blank or whitespace-padded prefixes are rejected.
 An empty character vector specifies no species prefixes. For `otherConiferSp`,
 it disables additional conifers while leaving the jack-pine, larch and spruce
 settings unchanged.
+
+### Final area summary
+
+With `plotAndSaveFinalSummary = TRUE`, each classification records areas calculated from raster
+cell areas in hectares. The table `sim$WB_HartJohnstoneForestClassesAreaHistory` contains
+`year`, `classId`, `class`, `area_ha`, `colour` and `nodata_ha`. Absent classes have zero
+area, and NoData area is tracked separately rather than included in the bars.
+The subtitle states that NoData is excluded. A caption beneath the graph summarizes
+classified and NoData area ranges across classification times, plus classified coverage
+as a percentage of the full raster extent. NoData includes masked cells; this percentage
+is not necessarily the percentage of the study area with valid data.
+
+The `plotAndSaveFinalSummary` event runs once at simulation end, at priority 10, after the final
+classification and TIFF save. It displays the stacked-bar graph on the active graphics
+device using the raster's class colours, with the module name in its title. The same graph
+is saved to `WB_HartJohnstoneForestClasses_finalSummary_<time>.png` in `outputPath(sim)`
+at 11 by 6 inches and 300 dpi; an existing file is overwritten. It does not require saved
+TIFFs or `.plotInitialTime`. Set `plotAndSaveFinalSummary = FALSE` to disable area recording,
+display and PNG saving. Regular map plotting remains opt-in.
 
 ### Expected Module Inputs
 

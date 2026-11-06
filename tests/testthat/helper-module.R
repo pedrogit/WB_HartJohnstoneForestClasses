@@ -2,6 +2,7 @@
 # Added: the original had no loader, its tests assumed classifyStand() was already defined.
 moduleDir <- normalizePath(file.path(testthat::test_path(), "..", ".."), winslash = "/")
 sys.source(file.path(moduleDir, "R", "WB_HartJohnstoneForestClasses.r"), envir = environment())
+sys.source(file.path(moduleDir, "R", "forestClassSummary.R"), envir = environment())
 library(data.table)
 library(terra)
 

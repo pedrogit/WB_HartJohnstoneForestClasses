@@ -11,7 +11,7 @@ defineModule(sim, list(
   timeunit = "year",
   # citation = list("citation.bib"),
   # documentation = deparse(list("README.txt", "WB_HartJohnstoneForestClasses.Rmd")),
-  reqdPkgs = list("SpaDES.tools", "data.table", "reproducible", "LandR"),
+  reqdPkgs = list("SpaDES.tools", "data.table", "reproducible", "LandR", "terra", "ggplot2"),
   loadOrder = list(after = c("Biomass_core")),
   parameters = rbind(
     defineParameter(".plots", "character", "screen", NA, NA,
@@ -20,6 +20,8 @@ defineModule(sim, list(
                     "Describes the simulation time at which the first plot event should occur."),
     defineParameter(".plotInterval", "numeric", NA_real_, NA, NA,
                     "Describes the simulation time interval between plot events."),
+    defineParameter("plotAndSaveFinalSummary", "logical", TRUE, NA, NA,
+                    "Record class areas at each classification, then display and save a PNG summary in the output folder at simulation end, independently of recurring map plots and TIFF saving."),
     defineParameter("WB_HJForestClassesTimeStep", "numeric", NA_real_, NA, NA,
                      "NA follows the core succession interval (10 years standalone); an explicit value must match the core when coupled."),
     defineParameter(".saveInitialTime", "numeric", NA_real_, NA, NA,
@@ -59,6 +61,8 @@ defineModule(sim, list(
     ),
 
   outputObjects = bindrows(
+    createsOutput("WB_HartJohnstoneForestClassesAreaHistory", "data.table",
+                  desc = "Class areas in hectares at each classification time, including zero-area classes and NoData area; available when plotAndSaveFinalSummary is TRUE."),
     createsOutput("WB_HartJohnstoneForestClassesMap", "RasterLayer",
                   desc = paste("Raster map classified into pre-defined",
                                "vegetation classes")),
@@ -69,7 +73,8 @@ defineModule(sim, list(
 # SpaDES calls this function for each event of the module. The event type selects the branch:
 # init (once, at simulation start), reComputeHJForestClassesMap (the classification, repeated
 # every classification interval), plot and save (optional, only scheduled when their initial
-# times are set). Event priorities decide the order of events scheduled at the same time:
+# times are set), and plotAndSaveFinalSummary (once at the end, enabled by its parameter).
+# Event priorities decide the order of events scheduled at the same time:
 # lower numbers run first, so classification (8.5) runs before plot (8.75) and save (9) and
 # they always see the freshly computed map.
 doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
@@ -78,7 +83,7 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
     eventType,
     
     init = {
-      # Prepare inputs (supplied or generated) and compute the first map.
+      # Prepare inputs (supplied or generated) for the first classification event.
       sim <- Init(sim)
       # The classification interval follows Biomass_core's succession time step so the map is
       # recomputed exactly when the cohorts change. When Biomass_core is absent (standalone
@@ -103,11 +108,22 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
         sim <- scheduleEvent(sim, P(sim)$.plotInitialTime, "WB_HartJohnstoneForestClasses", "plot", 8.75)
       if (!is.na(P(sim)$.saveInitialTime))
         sim <- scheduleEvent(sim, P(sim)$.saveInitialTime, "WB_HartJohnstoneForestClasses", "save", 9)
+      # The final summary runs after classification, map plotting and saving at the end time.
+      if (isTRUE(P(sim)$plotAndSaveFinalSummary)) {
+        sim$WB_HartJohnstoneForestClassesAreaHistory <- data.table::data.table()
+        sim <- scheduleEvent(sim, end(sim), "WB_HartJohnstoneForestClasses", "plotAndSaveFinalSummary", 10)
+      }
     },
 
     reComputeHJForestClassesMap = {
       # Classify the stands from the current cohort data and replace the map in sim.
       sim <- reComputeHJForestClassesMap(sim)
+      # Store only area totals, so the final graph needs neither saved rasters nor old maps.
+      if (isTRUE(P(sim)$plotAndSaveFinalSummary)) {
+        sim$WB_HartJohnstoneForestClassesAreaHistory <- data.table::rbindlist(list(
+          sim$WB_HartJohnstoneForestClassesAreaHistory,
+          forestClassAreas(sim$WB_HartJohnstoneForestClassesMap, time(sim))))
+      }
       # Count this classification and schedule the next one, unless it would fall after the
       # end of the simulation.
       mod$classificationIndex <- mod$classificationIndex + 1L
@@ -123,6 +139,16 @@ doEvent.WB_HartJohnstoneForestClasses = function(sim, eventTime, eventType) {
       interval <- if (is.na(P(sim)$.plotInterval)) mod$classificationInterval else P(sim)$.plotInterval
       if (!is.finite(interval) || interval <= 0) stop("Plot interval must be finite and positive.")
       sim <- scheduleEvent(sim, time(sim) + interval, "WB_HartJohnstoneForestClasses", "plot", 8.75)
+    },
+
+    plotAndSaveFinalSummary = {
+      # Use the same graph for the active graphics device and the output PNG.
+      summaryPlot <- plotForestClassAreas(sim$WB_HartJohnstoneForestClassesAreaHistory)
+      print(summaryPlot)
+      # The end-time stamp distinguishes simulation lengths; an existing PNG is overwritten.
+      fname <- file.path(outputPath(sim), paste0("WB_HartJohnstoneForestClasses_finalSummary_",
+                                                formatSimulationTime(time(sim)), ".png"))
+      ggplot2::ggsave(fname, plot = summaryPlot, width = 11, height = 6, units = "in", dpi = 300)
     },
 
     save = {
