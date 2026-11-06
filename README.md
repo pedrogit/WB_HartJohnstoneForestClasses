@@ -129,6 +129,15 @@ Soon...
 
 ## Change History
 
+### 2026-11-06 — Biomass normalization
+
+`classifyStand()` requires a `B` column. On its local working table, finite negative
+biomass, logical values, missing values (including NaN) and unparseable strings become
+zero. Numeric strings and factor labels are converted to numbers. Infinite values are
+left unchanged; no overflow check is applied. Finite nonnegative numeric inputs retain
+their existing results, and zero-total groups remain mixed (class 2). The caller's
+`cohortData` is not modified.
+
 ### 2026-11-06 — cohortData is no longer modified
 
 `classifyStand()` added a `speciesNb` column to the `cohortData` table it received, because

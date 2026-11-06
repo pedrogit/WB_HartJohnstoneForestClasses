@@ -186,6 +186,7 @@ test_that("custom species prefixes drive the groups, including empty vectors", {
 test_that("invalid inputs are rejected", {
   forest <- rast(nrows = 1, ncols = 1, vals = 1)
   d <- data.table(pixelGroup = 1L, speciesCode = factor("Pice_mar"), B = 100)
+  expect_error(classifyQuietly(d[, .(pixelGroup, speciesCode)], forest), "B column")
   asCharacter <- copy(d)
   asCharacter$speciesCode <- as.character(asCharacter$speciesCode)
   expect_error(classifyQuietly(asCharacter, forest), "factor")
@@ -195,4 +196,36 @@ test_that("invalid inputs are rejected", {
     expect_error(do.call(classifyQuietly, c(list(d, forest), setNames(list(NA_character_), parameter))),
                  parameter)
   }
+})
+
+# Compare normalized biomass with explicit numeric inputs, including zero-total groups.
+test_that("biomass normalization preserves the caller and numeric classification", {
+  map <- rast(nrows = 1, ncols = 5, vals = 1:5)
+  makeCohorts <- function(b) data.table(
+    pixelGroup = 1:5, speciesCode = factor(rep("Pice_mar", 5)), B = b)
+  cases <- list(
+    numeric = c(-10, NA_real_, NaN, 100, 0),
+    character = c("-10", "unknown", NA_character_, "1e2", "0"),
+    factor = factor(c("-10", "unknown", NA_character_, "100", "0")))
+  for (b in cases) {
+    d <- makeCohorts(b)
+    before <- copy(d)
+    expect_equal(classValues(classifyQuietly(d, map)), c(2, 2, 2, 6, 2))
+    expect_identical(d, before)
+  }
+  d <- makeCohorts(c(TRUE, FALSE, NA, TRUE, FALSE))
+  before <- copy(d)
+  expect_equal(classValues(classifyQuietly(d, map)), rep(2, 5))
+  expect_identical(d, before)
+})
+
+test_that("infinite biomass passes through without normalization", {
+  # A negative infinite spruce contribution dominates a finite non-conifer contribution
+  # under the existing arithmetic; replacing it with zero would instead produce class 1.
+  map <- rast(nrows = 1, ncols = 1, vals = 1)
+  d <- data.table(pixelGroup = 1, speciesCode = factor(c("Pice_mar", "Popu_tre")),
+                  B = c(-Inf, 100))
+  expect_equal(classValues(classifyQuietly(d, map)), 2)
+  d[, B := c(Inf, 100)]
+  expect_equal(classValues(classifyQuietly(d, map)), 2)
 })

@@ -65,7 +65,10 @@ classifyStand <- function(
     classificationTablePath = NULL,
     otherConiferSp = c("Abie", "Calc", "Cham", "Juni", "Pinu", "Pseu", "Sequ", "Taxu", "Thuj", "Tsug")
 ) {
-  
+  # Biomass must be supplied explicitly, even when the cohort table is empty.
+  if (!is.data.frame(cohortData) || !"B" %in% names(cohortData)) {
+    stop("cohortData must contain a B column.")
+  }
   saveClassSummaryTable <- TRUE
   labels = c("deci", "mixed", "conimix", "jackpine", "larch", "spruce")
   levels = c(1L, 2L, 3L, 4L, 5L, 6L)
@@ -83,6 +86,19 @@ classifyStand <- function(
   # the speciesNb column added below stays local to this function. Any speciesNb column in
   # the input is not copied, and as.data.table() also accepts a plain data.frame.
   cd <- data.table::as.data.table(cohortData)[, .(pixelGroup, speciesCode, B)]
+
+  # Normalize biomass locally: logical values represent no biomass, while character
+  # numbers are parsed as numeric values. Factor labels are parsed rather than their codes.
+  if (is.logical(cd$B)) {
+    cd[, B := rep(0, .N)]
+  } else if (is.character(cd$B) || is.factor(cd$B)) {
+    cd[, B := suppressWarnings(as.numeric(as.character(B))) ]
+  } else if (!is.numeric(cd$B)) {
+    stop("cohortData B must be numeric, logical, character or factor.")
+  }
+  # Missing values, unparseable strings and finite negative values contribute zero.
+  # Infinite values are left unchanged and pass through the biomass calculations.
+  cd[is.na(B) | (is.finite(B) & B < 0), B := 0]
 
   # First match wins: named subtypes take precedence over other conifers.
   # In particular, Pinu_ban also matches Pinu but its biomass is counted once.
