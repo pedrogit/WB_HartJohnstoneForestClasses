@@ -54,10 +54,10 @@ defineModule(sim, list(
                  desc = paste("Initial community table, created from available biomass (g/m2)",
                               "age and species cover data, as well as ecozonation information",
                               "Columns: B, pixelGroup, speciesCode")),
-    expectsInput("pixelGroupMap", "SpatRast",
+    expectsInput("pixelGroupMap", "SpatRaster",
                  desc = "Initial community map that has mapcodes match initial community table"),
-    expectsInput("WB_VegBasedDrainageMap", "SpatRast",
-                 desc = "WB_VegBasedDrainage drainage map raster (1 = poorly drained, 2 = well drained)"),
+    expectsInput("WB_VegBasedDrainageMap", "SpatRaster",
+                 desc = "WB_VegBasedDrainage drainage map raster (1 = poorly drained, 2 = well drained)")
     ),
 
   outputObjects = bindrows(
@@ -65,7 +65,7 @@ defineModule(sim, list(
                   desc = "Class areas in hectares at each classification time, including zero-area classes and NoData area; available when plotAndSaveFinalSummary is TRUE."),
     createsOutput("WB_HartJohnstoneForestClassesMap", "RasterLayer",
                   desc = paste("Raster map classified into pre-defined",
-                               "vegetation classes")),
+                               "vegetation classes"))
   )
 ))
 
